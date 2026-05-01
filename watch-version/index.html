@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>THE WATCH CHALLENGE | Precision Focus</title>
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --gold:#d4af37; /* Das Luxus-Gold */
+      --bg:#0a0a0a;
+      --dark-grey:#1a1a1a;
+      --shadow:rgba(212,175,55,0.15);
+      --success:#d4af37;
+      --danger:#550000;
+    }
+
+    *{ margin:0; padding:0; box-sizing:border-box; font-family: 'Georgia', serif; }
+
+    body{
+      background:var(--bg);
+      color:var(--white);
+      min-height:100vh;
+      padding:20px 14px 40px;
+      overflow-x:hidden;
+    }
+
+    .wrap{ width:100%; max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+
+    .title h1{
+      font-size:clamp(20px, 5vw, 36px);
+      font-weight:900;
+      letter-spacing:4px;
+      color:var(--gold);
+      text-transform:uppercase;
+    }
+
+    .btn{
+      appearance:none; border:1px solid var(--gold);
+      background:transparent; color:var(--gold);
+      padding:14px 22px; border-radius:4px;
+      font-weight:900; cursor:pointer; text-decoration:none;
+      display:inline-flex; align-items:center; justify-content:center;
+      transition: all .3s ease; text-transform:uppercase; letter-spacing:1px;
+    }
+
+    .btn:hover{ background:var(--gold); color:var(--black); }
+
+    .hud{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
+
+    .stat{ border:1px solid var(--gold); border-radius:4px; padding:12px; background:var(--dark-grey); text-align:center; }
+
+    .stat .label{ font-size:10px; color:var(--gold); opacity:.7; text-transform:uppercase; font-weight:800; margin-bottom:4px; letter-spacing:.1em; }
+
+    .stat .value{ font-size:clamp(18px, 4vw, 28px); font-weight:900; line-height:1; }
+
+    .game-shell{ position:relative; width:100%; background:var(--black); border:1px solid var(--gold); border-radius:8px; overflow:hidden; box-shadow:0 0 40px var(--shadow); }
+
+    canvas{ display:block; width:100%; height:auto; background:var(--black); touch-action:none; }
+
+    .overlay{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.92); text-align:center; z-index:100; }
+
+    .card{ width:min(100%, 480px); background:var(--dark-grey); border:1px solid var(--gold); border-radius:4px; padding:40px 20px; }
+
+    .card h2{ font-weight:900; letter-spacing:2px; color:var(--gold); text-transform:uppercase; }
+
+    .leaderboard-container{ background:var(--dark-grey); border:1px solid var(--gold); border-radius:4px; padding:20px; margin-top:10px; }
+
+    .leaderboard-title{ color:var(--gold); font-weight:900; text-transform:uppercase; margin-bottom:10px; border-bottom:1px solid var(--gold); padding-bottom:5px; letter-spacing:1px; }
+
+    .leaderboard-entry{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(212,175,55,0.1); font-weight:700; list-style:none; }
+
+    #nameInput{ border:1px solid var(--gold); background:transparent; color:var(--gold); padding:14px; border-radius:4px; width:100%; font-size:18px; text-align:center; margin:15px 0; outline:none; text-transform:uppercase; }
+
+    @media (max-width:720px){ .hud{ grid-template-columns:repeat(2, minmax(0,1fr)); } .btn{ width:100%; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div class="title"><h1>WATCH CHALLENGE</h1></div>
+      <button class="btn" id="resetBtn" type="button">REBOOT</button>
+    </div>
+
+    <section class="hud">
+      <div class="stat"><div class="label">Precision</div><div class="value" style="color:var(--gold)" id="scoreValue">0</div></div>
+      <div class="stat"><div class="label">Level</div><div class="value" id="roundValue">1</div></div>
+      <div class="stat"><div class="label">Targets</div><div class="value" id="boxValue">2</div></div>
+      <div class="stat"><div class="label">Mastery</div><div class="value" id="bestValue">0</div></div>
+    </section>
+
+    <section class="game-shell">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+      <div class="overlay" id="startOverlay">
+        <div class="card">
+          <h2>THE CHALLENGE</h2>
+          <p style="margin:15px 0; font-style:italic;">Master your focus. Perfection is expected.</p>
+          <button class="btn" id="startBtn" type="button" style="width:100%; background:var(--gold); color:#000;">START MISSION</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="nameOverlay">
+        <div class="card">
+          <h2>NEW MASTERY LEVEL</h2>
+          <input type="text" id="nameInput" placeholder="YOUR INITIALS" maxlength="12" />
+          <button class="btn" id="saveScoreBtn" type="button" style="width:100%;">RECORD PRECISION</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="gameOverOverlay">
+        <div class="card">
+          <h2>FOCUS LOST</h2>
+          <div id="finalScore" style="font-size:64px; font-weight:900; color:var(--gold); margin:10px 0;">0</div>
+          <p id="bestLine" style="font-weight:800; opacity:0.6; margin-bottom:20px; text-transform:uppercase; font-size:12px;">Record: 0</p>
+          <button class="btn" id="restartBtn" type="button" style="width:100%; margin-bottom:12px; background:var(--gold); color:#000;">RETRY</button>
+          <div style="margin-top:15px; padding:15px; border-radius:4px; border:1px solid var(--gold);">
+            <p id="pivotText" style="font-size:13px; font-weight:800; margin-bottom:10px;">PRECISION DEFINES THE MASTER.</p>
+            <a href="mailto:DEINE-MAIL@TEST.DE" class="btn" style="width:100%; text-decoration:none;">TALK TO ME</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="leaderboard-container">
+      <div class="leaderboard-title">Top Performance</div>
+      <ul id="leaderboardList"></ul>
+    </section>
+  </main>
+
+  <script>
+    /* HIER FOLGT DIE SPIEL-LOGIK AUS DEINER DATEI, ANGEPASST AUF GOLD-DESIGN */
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreValue = document.getElementById("scoreValue");
+    const roundValue = document.getElementById("roundValue");
+    const boxValue = document.getElementById("boxValue");
+    const bestValue = document.getElementById("bestValue");
+    const startOverlay = document.getElementById("startOverlay");
+    const nameOverlay = document.getElementById("nameOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const saveScoreBtn = document.getElementById("saveScoreBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const nameInput = document.getElementById("nameInput");
+    const leaderboardList = document.getElementById("leaderboardList");
+    const finalScoreDisplay = document.getElementById("finalScore");
+    const bestLineDisplay = document.getElementById("bestLine");
+    const pivotText = document.getElementById("pivotText");
+
+    const BEST_KEY = "watchBest_v1";
+    const LEADERBOARD_KEY = "watchLeaderboard_v1";
+
+    const state = {
+      running: false, score: 0, round: 1, boxCount: 2,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      phase: "idle", phaseStartedAt: 0, selectedBoxId: null,
+      correctBoxId: null, hoverBoxId: null, showBallTime: 1400,
+      shuffleDuration: 2200, swapsRemaining: 0, activeSwap: null, breatherMs: 300
+    };
+
+    const boxes = [];
+    function setPhase(next) { state.phase = next; state.phaseStartedAt = performance.now(); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    function roundRect(c, x, y, w, h, r, fill, stroke) {
+      c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y);
+      c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
+      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h);
+      c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r);
+      c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+      if (fill) c.fill(); if (stroke) c.stroke();
+    }
+
+    function renderLeaderboard() {
+      const board = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
+      leaderboardList.innerHTML = board.length ? board.map((entry, i) => `
+        <li class="leaderboard-entry"><span>#${i + 1} ${entry.name}</span><span>${entry.score}</span></li>
+      `).join("") : '<li class="leaderboard-entry"><span>No records yet</span></li>';
+    }
+
+    function saveScore() {
+      const name = nameInput.value.trim().toUpperCase() || "MASTER";
+      let board = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
+      board.push({ name, score: state.score });
+      board.sort((a, b) => b.score - a.score);
+      board = board.slice(0, 10);
+      localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board));
+      nameOverlay.classList.add("hidden");
+      gameOverOverlay.classList.remove("hidden");
+      renderLeaderboard();
+    }
+
+    function drawBoxes() {
+      boxes.forEach(box => {
+        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
+        const y = box.y - box.lift;
+        ctx.save();
+        ctx.fillStyle = isHovered ? "#222" : "#111";
+        ctx.strokeStyle = "#d4af37";
+        ctx.lineWidth = 2;
+        roundRect(ctx, box.x, y, box.w, box.h, 4, true, true);
+        
+        // Der Fokus-Punkt (Goldener Ring)
+        if (state.phase === "show" && box.id === state.correctBoxId) {
+          ctx.beginPath();
+          ctx.arc(box.x + box.w/2, y + box.h/2, box.w*0.2, 0, Math.PI*2);
+          ctx.strokeStyle = "#d4af37";
+          ctx.lineWidth = 4;
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+    }
+
+    function buildRound() {
+      boxes.length = 0;
+      state.boxCount = Math.min(18, 2 + Math.floor(state.score / 1.5));
+      const count = state.boxCount;
+      let cols = Math.ceil(Math.sqrt(count));
+      const rows = Math.ceil(count / cols);
+      const spacing = 24;
+      const boxW = 80;
+      const gridW = cols * boxW + (cols - 1) * spacing;
+      const startX = (canvas.width - gridW) / 2;
+      const startY = 180;
+
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        boxes.push({ id: i, x: startX + c * (boxW + spacing), y: startY + r * (boxW + spacing), w: boxW, h: boxW, lift: 0 });
+      }
+      state.correctBoxId = Math.floor(Math.random() * count);
+      state.shuffleDuration = Math.max(800, 2400 - state.score * 70);
+      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.5));
+      setPhase("show");
+    }
+
+    function startNextSwap() {
+      if (state.swapsRemaining <= 0) { setPhase("wait"); return; }
+      let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
+      while(b===a) b = Math.floor(Math.random() * boxes.length);
+      const boxA = boxes[a], boxB = boxes[b];
+      state.activeSwap = { aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y, aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y, start: performance.now(), duration: Math.max(200, state.shuffleDuration / 6) };
+      state.swapsRemaining--;
+    }
+
+    function loop(ts) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (state.running) {
+        if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
+        else if (state.phase === "shuffle") {
+          if (!state.activeSwap) startNextSwap();
+          else {
+            const s = state.activeSwap, p = Math.min(1, (ts-s.start)/s.duration), e = easeInOutQuad(p);
+            const bA = boxes.find(b => b.id === s.aId), bB = boxes.find(b => b.id === s.bId);
+            bA.x = lerp(s.aStartX, s.aTargetX, e); bB.x = lerp(s.bStartX, s.bTargetX, e);
+            bA.y = lerp(s.aStartY, s.aTargetY, e); bB.y = lerp(s.bStartY, s.bTargetY, e);
+            if(p>=1) state.activeSwap = null;
+          }
+        } else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) setPhase("pick");
+        else if (state.phase === "reveal") {
+          const sel = boxes.find(b => b.id === state.selectedBoxId), cor = boxes.find(b => b.id === state.correctBoxId);
+          if(sel) sel.lift = Math.min(60, sel.lift + 5);
+          if(cor) cor.lift = Math.min(60, cor.lift + 5);
+          if(ts - state.phaseStartedAt > 1200) {
+            if(state.selectedBoxId === state.correctBoxId) { state.score++; state.round++; buildRound(); updateHud(); }
+            else gameOver();
+          }
+        }
+      }
+      drawBoxes();
+      requestAnimationFrame(loop);
+    }
+
+    function gameOver() {
+      state.running = false;
+      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
+      finalScoreDisplay.textContent = state.score;
+      bestLineDisplay.textContent = `Record: ${state.best}`;
+      updateHud();
+      const board = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
+      if (state.score > 0 && (board.length < 10 || state.score > board[board.length-1].score)) {
+        nameOverlay.classList.remove("hidden");
+      } else gameOverOverlay.classList.remove("hidden");
+    }
+
+    function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; boxValue.textContent = state.boxCount; bestValue.textContent = state.best; }
+    function startGame() { state.running = true; state.score = 0; state.round = 1; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); nameOverlay.classList.add("hidden"); }
+
+    canvas.addEventListener("click", e => {
+      if(state.phase !== "pick") return;
+      const rect = canvas.getBoundingClientRect(), x = (e.clientX - rect.left) * (canvas.width/rect.width), y = (e.clientY - rect.top) * (canvas.height/rect.height);
+      boxes.forEach(b => { if(x >= b.x && x <= b.x+b.w && y >= b.y-b.lift && y <= b.y-b.lift+b.h) { state.selectedBoxId = b.id; setPhase("reveal"); } });
+    });
+
+    startBtn.onclick = startGame; restartBtn.onclick = startGame; saveScoreBtn.onclick = saveScore; resetBtn.onclick = () => location.reload();
+    renderLeaderboard(); requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
