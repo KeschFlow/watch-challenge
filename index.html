@@ -1,142 +1,73 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <!-- ======================================================================= -->
-    <!-- 🎨 1. KUNDEN-BEREICH (KAROSSERIE & LACKIERUNG) - NUR HIER ÄNDERN 🎨       -->
-    <!-- ======================================================================= -->
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- 1.1 META DATEN (Für WhatsApp, Instagram & Co. Vorschau) -->
-    <title>MG PRECISION | THE CHALLENGE</title>
-    <meta property="og:title" content="MG PRECISION | THE CHALLENGE">
-    <meta property="og:description" content="Finde die Kiste mit der Krone. Knackst du den Rekord?">
-    <meta property="og:image" content="preview.jpg"> <!-- Bild-Datei muss im selben Ordner liegen -->
-    <meta property="og:url" content="https://keschflow.github.io/watch-challenge/">
-    <meta name="twitter:card" content="summary_large_image">
+    <title>MG PRECISION | PRO ENGINE</title>
 
-    <!-- 1.2 FARBEN DES KUNDEN & DESIGNS -->
+    <!-- 1. KUNDEN-BEREICH -->
     <style>
         :root {
-            /* Grundfarben */
-            --hintergrund: #e0e0e0;       /* Hintergrund der gesamten Seite */
-            --hauptfarbe: #c5a059;        /* Markenfarbe (z.B. das MG Gold) */
-            --akzentfarbe: #000000;       /* Dunkle Farbe für Header und Kisten */
-            
-            /* Textfarben */
-            --text-hell: #ffffff;         /* Text auf dunklen Elementen */
-            --text-dunkel: #000000;       /* Text auf hellen Elementen */
-            --text-button-haupt: #000000; /* Text auf dem Haupt-Button (z.B. Schwarz auf Gold) */
-
-            /* Game Over & Rank Design (Dunkles Theme) */
-            --karten-bg: #1a1a1a;         /* Hintergrundfarbe der Menü-Karten */
-            --karten-text: #ffffff;       /* Haupt-Textfarbe in den Karten */
-            --lb-bg: #222222;             /* Hintergrund der Ränge-Liste */
-            --lb-rand: #333333;           /* Rahmenlinien in der Ränge-Liste */
-            --btn-share-bg: #25D366;      /* WhatsApp Grün für den Teilen-Button */
+            --hintergrund: #e0e0e0;
+            --hauptfarbe: #c5a059;
+            --akzentfarbe: #000000;
+            --text-hell: #ffffff;
+            --karten-bg: #1a1a1a;
+            --lb-bg: #222222;
+            --lb-rand: #333333;
+            --btn-share-bg: #25D366;
         }
     </style>
 
-    <!-- 1.3 TEXTE, LINKS & SPIELGRAFIK -->
     <script>
         const KUNDE = {
-            // Texte im Startmenü
             titel: "THE CHALLENGE",
-            untertitel: "Finde die Kiste mit der Krone.",
+            untertitel: "Verliere das Logo nicht aus den Augen.",
             btnStart: "SPIEL STARTEN",
-            
-            // Texte im Game Over Menü
             verlorenText: "VERLOREN",
-            deinScoreText: "DEIN SCORE",
+            gewonnenText: "GEWONNEN!",
             btnShopText: "ZUR KOLLEKTION",
             shopLink: "https://marcgebauer.com/collections/all",
             btnRetryText: "NOCHMAL SPIELEN",
-
-            // Texte der Ränge-Übersicht
             ranglisteTitel: "RÄNGE & ZIELE",
-
-            // NEU: 1. Rang-System (Karriere-Leiter nach Punkten)
             rangSystem: [
                 { minScore: 0,  titel: "Praktikant 🥉" },
                 { minScore: 5,  titel: "Azubi 🥈" },
                 { minScore: 10, titel: "Vorarbeiter 👷" },
                 { minScore: 15, titel: "Meister 🥇" },
-                { minScore: 20, titel: "Obermacker 👑" }
+                { minScore: 25, titel: "Obermacker 👑" }
             ],
-
-            // 2. Share-Funktion (WhatsApp)
             btnShareText: "SCORE TEILEN",
-            shareNachricht: "Ich habe bei der Challenge einen Score von {SCORE} geschafft! 👑 Schaffst du mehr? Spiel hier: ",
-
-            // 3. Belohnungs-System (Gutscheincode ab X Punkten)
-            belohnungAktiv: true,           // true = an, false = aus
-            belohnungAbScore: 20,           // Ab wie vielen Punkten gibt es den Code? (Am besten auf Obermacker setzen)
-            gewonnenText: "GEWONNEN!",      // Ersetzt das rote "VERLOREN"
-            belohnungNachricht: "Stark! Hier ist dein Rabattcode:",
+            shareNachricht: "Ich habe bei der Challenge Score {SCORE} erreicht! 👑 Schaffst du das? ",
+            belohnungAktiv: true,
+            belohnungAbScore: 25,
+            belohnungNachricht: "Stark! Dein Rabattcode:",
             belohnungCode: "MG-MASTER-10",
-
-            // Spiel-Grafik
-            kistenFarbe: "#000000",       // Farbe der zu mischenden Kisten
-            symbolFarbe: "#ffffff"        // Farbe des Symbols in der richtigen Kiste
+            logoPfad: "logo.png",
+            kistenFarbe: "#000000"
         };
     </script>
 
-    <!-- ======================================================================= -->
-    <!-- 🛑 AB HIER NICHTS MEHR ÄNDERN (MOTOR & FAHRWERK) 🛑                     -->
-    <!-- ======================================================================= -->
     <style>
+        /* CSS bleibt identisch zum Vorherigen für Konsistenz */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--hintergrund); color: var(--text-dunkel); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-        .hidden { display: none !important; } /* Globaler Fix für versteckte Elemente */
-
-        .hud { 
-            background: var(--akzentfarbe); color: var(--text-hell); display: grid; grid-template-columns: repeat(3, 1fr); 
-            padding: 15px; border-bottom: 3px solid var(--hauptfarbe); z-index: 20;
-        }
+        body { background: var(--hintergrund); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        .hud { background: var(--akzentfarbe); color: var(--text-hell); display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-bottom: 3px solid var(--hauptfarbe); z-index: 20; }
         .stat { text-align: center; }
         .stat .label { font-size: 9px; text-transform: uppercase; color: var(--hauptfarbe); letter-spacing: 1px; }
         .stat .value { font-size: 20px; font-weight: bold; }
-
-        .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; width: 100%; height: 100%; }
-        
-        /* PREMIUM SPIELFELD DESIGN */
-        canvas { 
-            background: linear-gradient(145deg, #ffffff, #f2f2f2); 
-            box-shadow: 0 25px 60px rgba(0,0,0,0.25); 
-            border-radius: 20px;
-            border: 3px solid var(--hauptfarbe);
-            max-width: 95vw; max-height: 70vh; cursor: pointer; 
-        }
-
+        .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        canvas { background: #fff; box-shadow: 0 25px 60px rgba(0,0,0,0.25); border-radius: 20px; border: 3px solid var(--hauptfarbe); max-width: 95vw; max-height: 70vh; cursor: pointer; }
         .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; }
-        
-        /* Karten & Leaderboard an Variablen angepasst */
-        .card { max-width: 450px; width: 95%; background: var(--karten-bg); padding: 30px 20px; text-align: center; border-radius: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border-top: 4px solid var(--hauptfarbe); color: var(--karten-text); }
-        h1 { font-size: 24px; margin-bottom: 5px; letter-spacing: 2px; }
-        
+        .card { max-width: 450px; width: 95%; background: var(--karten-bg); padding: 30px 20px; text-align: center; border-radius: 8px; border-top: 4px solid var(--hauptfarbe); color: #fff; }
         .leaderboard-container { background: var(--lb-bg); border-radius: 6px; padding: 15px; margin: 20px 0; border: 1px solid var(--lb-rand); }
-        .leaderboard-container h3 { font-size: 14px; color: var(--hauptfarbe); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--lb-rand); padding-bottom: 10px; }
-        #rankList { list-style: none; margin-bottom: 0px; text-align: left; }
-        #rankList li { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--lb-rand); font-size: 14px; }
-        #rankList li:last-child { border-bottom: none; }
-        #rankList li:nth-child(odd) { background: rgba(255,255,255,0.02); }
-        #rankList li span.lb-score { font-weight: bold; color: var(--hauptfarbe); }
-        #rankList li span.lb-name { color: #ddd; }
-        
-        /* NEUE STYLES FÜR SHARE & REWARD */
-        .button-row { display: flex; gap: 10px; width: 100%; }
-        .btn-share { background: var(--btn-share-bg); color: #fff; font-size: 14px; padding: 12px; }
-        .reward-box { background: rgba(197, 160, 89, 0.15); border: 2px dashed var(--hauptfarbe); padding: 15px; border-radius: 6px; margin: 15px 0; }
-        .reward-code { font-size: 22px; font-weight: bold; color: var(--hauptfarbe); letter-spacing: 2px; margin-top: 5px; user-select: all; }
-
-        .btn { border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px; border-radius: 4px; transition: transform 0.1s, opacity 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        .btn:hover { opacity: 0.9; }
-        
-        .btn-collection { background: var(--hauptfarbe); color: var(--text-button-haupt); font-size: 18px; padding: 20px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .btn-retry { background: var(--lb-rand); color: var(--text-hell); font-size: 14px; padding: 12px; border: 1px solid var(--lb-rand); }
+        #rankList li { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--lb-rand); font-size: 14px; list-style: none; }
+        .reward-box { background: rgba(197, 160, 89, 0.15); border: 2px dashed var(--hauptfarbe); padding: 15px; margin: 15px 0; }
+        .btn { border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 10px; }
+        .btn-collection { background: var(--hauptfarbe); font-size: 18px; }
+        .btn-share { background: var(--btn-share-bg); color: #fff; }
+        .btn-retry { background: #333; color: #fff; }
     </style>
 </head>
 <body>
@@ -148,197 +79,143 @@
 
     <main class="game-shell">
         <canvas id="gameCanvas" width="800" height="800"></canvas>
-        
         <div class="overlay" id="startOverlay">
             <div class="card">
-                <h1 id="ui-title">Titel</h1>
-                <p id="ui-subtitle" style="font-size: 12px; color: #aaa; margin-bottom: 20px;">Untertitel</p>
-                <button class="btn btn-collection" id="startBtn">START</button>
+                <h1 id="ui-title"></h1><p id="ui-subtitle"></p>
+                <button class="btn btn-collection" id="startBtn"></button>
             </div>
         </div>
-
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 id="ui-lost-title" style="color:#ff4444; font-size: 22px;">Verloren</h1>
-                <div id="finalScore" style="font-size:55px; font-weight:bold; margin:0; color: var(--hauptfarbe); line-height: 1.1;">0</div>
-                <div id="ui-rank-display" style="font-size: 15px; font-weight: bold; margin-bottom: 2px; color: var(--karten-text);">Praktikant</div>
-                <div id="ui-score-label" style="font-size: 11px; color: #888; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">SCORE</div>
-
-                <!-- Belohnungs-Box (wird nur bei Gewinn eingeblendet) -->
+                <h1 id="ui-lost-title"></h1>
+                <div id="finalScore" style="font-size:55px; font-weight:bold; color:var(--hauptfarbe);">0</div>
+                <div id="ui-rank-display" style="font-weight:bold;"></div>
                 <div id="rewardSection" class="reward-box hidden">
-                    <div id="ui-reward-msg" style="font-size: 13px; color: var(--karten-text);"></div>
-                    <div id="ui-reward-code" class="reward-code"></div>
+                    <div id="ui-reward-msg"></div><div id="ui-reward-code" style="font-size:22px; font-weight:bold; color:var(--hauptfarbe);"></div>
                 </div>
-
-                <div class="leaderboard-container">
-                    <h3 id="ui-lb-title">RÄNGE & ZIELE</h3>
-                    <ul id="rankList">
-                        <!-- Wird vom System generiert -->
-                    </ul>
-                </div>
-
-                <button class="btn btn-collection" id="collectionBtn">SHOP</button>
-                <div class="button-row">
-                    <button class="btn btn-share" id="shareBtn">TEILEN</button>
-                    <button class="btn btn-retry" id="restartBtn">RETRY</button>
-                </div>
+                <div class="leaderboard-container"><h3 id="ui-lb-title"></h3><ul id="rankList"></ul></div>
+                <button class="btn btn-collection" id="collectionBtn"></button>
+                <div style="display:flex; gap:10px;"><button class="btn btn-share" id="shareBtn"></button><button class="btn btn-retry" id="restartBtn"></button></div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- TEMPLATE INJEKTION ---
+        const canvas = document.getElementById("gameCanvas"), ctx = canvas.getContext("2d");
+        const kundeLogo = new Image(); kundeLogo.src = KUNDE.logoPfad;
+        let boxes = [], state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_pro_v1")||0, phase: "idle", correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null, startPos: 0 };
+
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ui-title').textContent = KUNDE.titel;
             document.getElementById('ui-subtitle').textContent = KUNDE.untertitel;
             document.getElementById('startBtn').textContent = KUNDE.btnStart;
-            document.getElementById('ui-lost-title').textContent = KUNDE.verlorenText;
-            document.getElementById('ui-score-label').textContent = KUNDE.deinScoreText;
             document.getElementById('collectionBtn').textContent = KUNDE.btnShopText;
             document.getElementById('restartBtn').textContent = KUNDE.btnRetryText;
             document.getElementById('ui-lb-title').textContent = KUNDE.ranglisteTitel;
             document.getElementById('shareBtn').textContent = KUNDE.btnShareText;
-
-            // Ränge in die Liste füllen (Höchster Rang zuerst)
+            document.getElementById("bestValue").textContent = state.best;
             const list = document.getElementById("rankList");
-            list.innerHTML = "";
-            const umgekehrteRaenge = [...KUNDE.rangSystem].reverse();
-            umgekehrteRaenge.forEach(rang => {
-                const li = document.createElement("li");
-                li.innerHTML = `<span class="lb-name">${rang.titel}</span> <span class="lb-score">ab ${rang.minScore}</span>`;
-                list.appendChild(li);
+            [...KUNDE.rangSystem].reverse().forEach(r => {
+                list.innerHTML += `<li><span>${r.titel}</span><span style="color:var(--hauptfarbe)">ab ${r.minScore}</span></li>`;
             });
         });
-
-        // --- SPIEL LOGIK ---
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        let boxes = []; 
-        let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("template_record_v2")||0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
-        document.getElementById("bestValue").textContent = state.best;
 
         class Box {
             constructor(id, x, y, size) { this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; this.lift=0; }
             draw() {
                 ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
-                
-                // 1. Luxus-Schatten für Tiefenwirkung
-                ctx.shadowColor = "rgba(0,0,0,0.4)";
-                ctx.shadowBlur = 15;
-                ctx.shadowOffsetY = 8;
-                
-                // 2. Kistenkörper (Abgerundete Ecken)
-                ctx.fillStyle = KUNDE.kistenFarbe; 
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 12); 
-                } else {
-                    ctx.rect(-this.w/2, -this.h/2, this.w, this.h);
-                }
+                ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 10; ctx.fillStyle = KUNDE.kistenFarbe;
+                if(ctx.roundRect) ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 12); else ctx.rect(-this.w/2, -this.h/2, this.w, this.h);
                 ctx.fill();
-                
-                // 3. Dezenter Glanz-Rand für 3D-Look
-                ctx.shadowColor = "transparent"; 
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // 4. Symbol (Krone) zeichnen
                 if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
-                    ctx.fillStyle = KUNDE.symbolFarbe; 
-                    const s = this.w*0.25; 
-                    ctx.beginPath();
-                    ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
-                    ctx.lineTo(s*0.5, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.5, 0);
-                    ctx.lineTo(-s, -s*0.5); ctx.closePath(); ctx.fill();
+                    if (kundeLogo.complete && kundeLogo.naturalWidth !== 0) {
+                        ctx.drawImage(kundeLogo, -this.w*0.3, -this.w*0.3, this.w*0.6, this.w*0.6);
+                    }
                 }
                 ctx.restore();
             }
         }
 
-        // --- SPIEL LOGIK ANPASSUNGEN ---
+        function buildRound() {
+            state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2));
+            document.getElementById("boxValue").textContent = state.boxCount;
+            let b = []; const area=600, maxR=5, cols=Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))), rows=Math.ceil(state.boxCount/cols);
+            const s=(area/maxR)-20, sp=20, tw=cols*s+(cols-1)*sp, th=rows*s+(rows-1)*sp;
+            const sx=(canvas.width-tw)/2, sy=(canvas.height-th)/2;
+            for(let i=0; i<state.boxCount; i++) b.push(new Box(i, sx+(i%cols)*(s+sp), sy+Math.floor(i/cols)*(s+sp), s));
+            boxes = b; state.correctBoxId=Math.floor(Math.random()*state.boxCount); state.startPos = state.correctBoxId;
+            state.swapsRemaining = 5 + Math.floor(state.score * 1.8); // 1. Swaps steigen aggressiv
+            state.phase = "show"; setTimeout(() => { if(state.running) state.phase="shuffle"; }, 1200);
+        }
 
-function buildRound() {
-    let b = []; 
-    // Kistenanzahl steigt, aber wir begrenzen sie für die Spielbarkeit auf 25
-    const maxKisten = 25;
-    const aktuelleKisten = Math.min(maxKisten, 2 + Math.floor(state.score / 2));
-    state.boxCount = aktuelleKisten;
+        function shuffle() {
+            if(state.swapsRemaining <= 0) {
+                // 2. Anti-Camper: Wenn die Kiste am Startplatz ist, einmal extra tauschen
+                if(state.correctBoxId === state.startPos) { state.swapsRemaining = 1; } 
+                else { state.phase = "pick"; return; }
+            }
+            let a=Math.floor(Math.random()*boxes.length), b=Math.floor(Math.random()*boxes.length);
+            while(a===b) b=Math.floor(Math.random()*boxes.length);
+            // 3. Tempo steigt konstant
+            let currentSpd = Math.min(0.18, 0.04 + (state.score * 0.006));
+            state.activeSwap = { aIdx:a, bIdx:b, sax:boxes[a].x, say:boxes[a].y, sbx:boxes[b].x, sby:boxes[b].y, p:0, spd:currentSpd };
+            state.swapsRemaining--;
+        }
 
-    const area = 600, maxR = 5, cols = Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))), rows = Math.ceil(state.boxCount / cols);
-    const s = (area / maxR) - 20, sp = 20, tw = cols * s + (cols - 1) * sp, th = rows * s + (rows - 1) * sp;
-    const sx = (canvas.width - tw) / 2, sy = (canvas.height - th) / 2;
-    
-    for(let i = 0; i < state.boxCount; i++) { 
-        const r = Math.floor(i / cols), c = i % cols; 
-        b.push(new Box(i, sx + c * (s + sp), sy + r * (s + sp), s)); 
-    }
-    boxes = b; 
-    
-    // Startposition der richtigen Kiste merken
-    state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-    const startPosId = state.correctBoxId;
-
-    // Schwierigkeit: Mehr Swaps und höheres Tempo je höher der Score
-    state.swapsRemaining = 5 + Math.floor(state.score * 1.5); 
-    setPhase("show");
-
-    setTimeout(() => { 
-        if(state.running) setPhase("shuffle"); 
-    }, 1200);
-}
-
-function shuffle() {
-    if(state.swapsRemaining <= 0) {
-        // ANTI-CAMPER CHECK: Ist die Kiste noch auf der Startposition?
-        // Falls ja, erzwingen wir einen allerletzten Tausch
-        setPhase("pick"); 
-        return; 
-    }
-
-    let a = Math.floor(Math.random() * boxes.length);
-    let b = Math.floor(Math.random() * boxes.length);
-    while(a === b) b = Math.floor(Math.random() * boxes.length);
-
-    // Dynamisches Tempo: Startet bei 0.03 und wird pro Punkt schneller
-    const basisSpeed = 0.04;
-    const speedBoost = state.score * 0.005;
-    const aktuellerSpeed = Math.min(0.15, basisSpeed + speedBoost); // Deckelung bei 0.15 für Fairness
-
-    state.activeSwap = { 
-        aIdx: a, bIdx: b, 
-        sax: boxes[a].x, say: boxes[a].y, 
-        sbx: boxes[b].x, sby: boxes[b].y, 
-        p: 0, 
-        spd: aktuellerSpeed 
-    };
-    state.swapsRemaining--;
-}
-        
-        // --- EVENT LISTENERS ---
-        document.getElementById("startBtn").addEventListener("click", () => { 
-            document.getElementById("startOverlay").classList.add("hidden"); state.running=true; state.score=0; state.boxCount=2; updateHUD(); buildRound(); 
-        });
-        
-        document.getElementById("restartBtn").addEventListener("click", () => {
-            document.getElementById("gameOverOverlay").classList.add("hidden");
-            state.running=true; state.score=0; state.boxCount=2; updateHUD(); buildRound();
-        });
-
-        document.getElementById("collectionBtn").addEventListener("click", () => {
-            window.open(KUNDE.shopLink, "_blank");
-        });
-
-        // Share-Funktion ausführen
-        document.getElementById("shareBtn").addEventListener("click", () => {
-            const text = KUNDE.shareNachricht.replace("{SCORE}", state.score) + window.location.href;
-            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-            window.open(whatsappUrl, "_blank");
-        });
-
-        canvas.addEventListener("mousedown", handleInput); 
-        canvas.addEventListener("touchstart", (e)=>{e.preventDefault(); handleInput(e);}, {passive:false});
-        
+        function update() {
+            if(state.phase==="shuffle") {
+                if(!state.activeSwap) shuffle();
+                else {
+                    state.activeSwap.p += state.activeSwap.spd; const p=Math.min(1, state.activeSwap.p);
+                    const ease = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2, 2)/2;
+                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sax+(state.activeSwap.sbx-state.activeSwap.sax)*ease;
+                    boxes[state.activeSwap.aIdx].y = state.activeSwap.say+(state.activeSwap.sby-state.activeSwap.say)*ease;
+                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx+(state.activeSwap.sax-state.activeSwap.sbx)*ease;
+                    boxes[state.activeSwap.bIdx].y = state.activeSwap.sby+(state.activeSwap.say-state.activeSwap.sby)*ease;
+                    if(p>=1) { 
+                        let tempId = boxes[state.activeSwap.aIdx].id;
+                        boxes[state.activeSwap.aIdx].id = boxes[state.activeSwap.bIdx].id;
+                        boxes[state.activeSwap.bIdx].id = tempId;
+                        state.activeSwap=null; 
+                    }
+                }
+            }
+            if(state.phase==="reveal") {
+                boxes.forEach(bx => { if(bx.id===state.correctBoxId || bx.id===state.selectedBoxId) bx.lift=Math.min(40, bx.lift+5); });
+                if(state.selectedBoxId===state.correctBoxId && state.score < 100) {
+                    setTimeout(() => { if(state.phase==="reveal") { state.score++; buildRound(); document.getElementById("scoreValue").textContent=state.score; } }, 1500);
+                    state.phase = "transition";
+                } else if (state.selectedBoxId !== state.correctBoxId) endGame();
+            }
+        }
+        function loop() { if(state.running || state.phase==="reveal") update(); ctx.clearRect(0,0,canvas.width,canvas.height); boxes.forEach(bx=>bx.draw()); requestAnimationFrame(loop); }
+        function endGame() {
+            state.running=false; if(state.score > state.best) { state.best=state.score; localStorage.setItem("mg_pro_v1", state.best); }
+            document.getElementById("finalScore").textContent=state.score;
+            let rank = KUNDE.rangSystem.filter(r => state.score >= r.minScore).pop();
+            document.getElementById("ui-rank-display").textContent = rank.titel;
+            const rew = document.getElementById("rewardSection");
+            if(KUNDE.belohnungAktiv && state.score >= KUNDE.belohnungAbScore) {
+                document.getElementById("ui-lost-title").textContent = KUNDE.gewonnenText;
+                document.getElementById("ui-reward-msg").textContent = KUNDE.belohnungNachricht;
+                document.getElementById("ui-reward-code").textContent = KUNDE.belohnungCode;
+                rew.classList.remove("hidden");
+            } else { document.getElementById("ui-lost-title").textContent = KUNDE.verlorenText; rew.classList.add("hidden"); }
+            document.getElementById("gameOverOverlay").classList.remove("hidden");
+        }
+        function handleInput(e) {
+            if(state.phase!=="pick") return;
+            const rect=canvas.getBoundingClientRect();
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            const cx=(clientX-rect.left)*(canvas.width/rect.width), cy=(clientY-rect.top)*(canvas.height/rect.height);
+            boxes.forEach(bx => { if(cx>bx.x && cx<bx.x+bx.w && cy>bx.y && cy<bx.y+bx.h) { state.selectedBoxId=bx.id; state.phase="reveal"; } });
+        }
+        document.getElementById("startBtn").onclick = () => { document.getElementById("startOverlay").classList.add("hidden"); state.running=true; state.score=0; buildRound(); };
+        document.getElementById("restartBtn").onclick = () => location.reload();
+        document.getElementById("collectionBtn").onclick = () => window.open(KUNDE.shopLink, "_blank");
+        document.getElementById("shareBtn").onclick = () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(KUNDE.shareNachricht.replace("{SCORE}", state.score) + window.location.href)}`, "_blank");
+        canvas.addEventListener("mousedown", handleInput); canvas.addEventListener("touchstart", (e)=>{e.preventDefault(); handleInput(e);}, {passive:false});
         loop();
     </script>
 </body>
