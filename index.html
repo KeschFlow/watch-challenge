@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MG PRECISION CHALLENGE | BOUTIQUE EDITION</title>
+    <title>MG PRECISION | MASTER BUILD</title>
     <style>
         :root { 
-            --gold: #d4af37; 
-            --titan: #e5e5e7; 
-            --dark-bg: #1a1a1c; 
-            --box-color: #2a2a2e;
+            --gold: #c5a059; 
+            --titan: #ffffff; 
+            --bg: #e5e5e7; /* Heller Platin-Hintergrund für maximalen Kontrast */
+            --box: #1a1a1a;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: radial-gradient(circle at center, #2c2c30 0%, #121214 100%); 
-            color: white; 
+            background: var(--bg); 
+            color: #333; 
             height: 100vh; 
             width: 100vw;
             overflow: hidden; 
@@ -24,47 +24,48 @@
             flex-direction: column; 
         }
 
-        /* HUD - Sauber zentriert oben */
+        /* HUD - Klar und lesbar */
         .hud { 
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 0; left: 0; right: 0;
             z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 15px; padding: 20px; width: 100%; max-width: 800px;
+            gap: 10px; padding: 15px; background: rgba(255,255,255,0.8);
+            border-bottom: 1px solid #ccc;
         }
-        .stat { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); 
-            padding: 10px; text-align: center; border-radius: 4px;
-        }
-        .stat .label { font-size: 10px; text-transform: uppercase; color: #888; letter-spacing: 2px; }
-        .stat .value { font-size: 22px; font-weight: bold; color: var(--titan); }
+        .stat { text-align: center; }
+        .stat .label { font-size: 10px; text-transform: uppercase; color: #666; letter-spacing: 1px; }
+        .stat .value { font-size: 20px; font-weight: bold; color: #000; }
 
-        /* Das Spielfeld - Absolut mittig fixiert */
+        /* Spielfeld zentriert */
         .game-shell { 
             flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            width: 100%; height: 100%; padding-top: 80px;
+            width: 100%; height: 100%;
         }
         canvas { 
-            max-width: 95vw; max-height: 70vh; cursor: pointer; 
-            filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5));
+            max-width: 90vw; max-height: 75vh; cursor: pointer; 
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
         }
 
         /* Overlays */
         .overlay { 
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9); 
+            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.9); 
             display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; 
         }
         .overlay.hidden { display: none !important; }
         .card { 
-            max-width: 400px; width: 90%; border: 1px solid var(--gold); 
-            padding: 40px; background: #111; border-radius: 2px;
+            max-width: 400px; width: 90%; border: 2px solid #000; 
+            padding: 40px; background: #fff; box-shadow: 0 0 50px rgba(0,0,0,0.1);
         }
         
-        h1 { font-size: 24px; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 20px; color: var(--gold); }
+        h1 { font-size: 24px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; color: #000; }
         .btn { 
-            background: var(--gold); color: black; border: none; padding: 18px; 
+            background: #000; color: #fff; border: none; padding: 18px; 
             font-weight: 900; text-transform: uppercase; letter-spacing: 2px; 
-            cursor: pointer; width: 100%; margin-bottom: 15px;
+            cursor: pointer; width: 100%; margin-bottom: 20px;
         }
-        .dev-link { color: #555; text-decoration: none; font-size: 11px; letter-spacing: 1px; display: block; margin-top: 20px; }
+        .dev-link { 
+            color: #666; text-decoration: none; font-size: 12px; font-weight: bold;
+            border-bottom: 1px solid #ccc; padding-bottom: 2px;
+        }
 
     </style>
 </head>
@@ -72,8 +73,8 @@
     
     <section class="hud">
         <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">0</div></div>
-        <div class="stat"><div class="label">Rekord</div><div class="value" id="bestValue">0</div></div>
-        <div class="stat"><div class="label">Boxen</div><div class="value" id="boxValue">2</div></div>
+        <div class="stat"><div class="label">Units</div><div class="value" id="boxValue">2</div></div>
+        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
 
     <main class="game-shell">
@@ -83,16 +84,19 @@
             <div class="card">
                 <h1>THE CHALLENGE</h1>
                 <button class="btn" id="startBtn">MISSION STARTEN</button>
-                <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">GET THIS TOOL</a>
+                <div style="margin-top:20px;">
+                    <p style="font-size:10px; margin-bottom:5px;">WANT THIS TOOL?</p>
+                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">CONTACT PARTNER</a>
+                </div>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
                 <h1 style="color:#d93025;">FOKUS VERLOREN</h1>
-                <div id="finalScore" style="font-size:80px; color:white; margin:20px 0; font-weight:100;">0</div>
+                <div id="finalScore" style="font-size:70px; color:#000; margin:10px 0; font-weight:900;">0</div>
                 <button class="btn" id="restartBtn">RETRY</button>
-                <a href="https://marcgebauer.com" target="_blank" style="color:var(--gold); text-decoration:none; font-size:12px;">MARCGEBAUER.COM</a>
+                <a href="https://marcgebauer.com" target="_blank" style="color:#000; text-decoration:none; font-weight:bold; font-size:14px;">MARCGEBAUER.COM</a>
             </div>
         </div>
     </main>
@@ -101,10 +105,10 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_boutique_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
+    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_final_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
     document.getElementById("bestValue").textContent = state.best;
 
-    class WatchBox {
+    class LuxuryBox {
         constructor(id, x, y, size) {
             this.id = id; this.x = x; this.y = y; this.w = size; this.h = size; this.lift = 0;
         }
@@ -112,30 +116,25 @@
             ctx.save();
             ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
             
-            // Schatten
-            ctx.shadowBlur = 15; ctx.shadowColor = "black";
-            
-            // Die Box (Dunkles Leder/Titan Design)
-            ctx.fillStyle = "#2a2a2e";
-            ctx.strokeStyle = "#444";
-            ctx.lineWidth = 2;
+            // Die Box (Schwarz mit Gold-Kante für Sichtbarkeit)
+            ctx.fillStyle = "#1a1a1a";
+            ctx.strokeStyle = "#c5a059";
+            ctx.lineWidth = 3;
             ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
             ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
             
-            // Silberner Verschluss/Detail
-            ctx.fillStyle = "#e5e5e7";
-            ctx.fillRect(-this.w*0.1, this.h*0.35, this.w*0.2, 5);
-
-            // Die Krone (Gold)
+            // Krone (Strahlendes Weiß/Gold Mix)
             if ((state.phase === "show" || state.phase === "reveal") && this.id === state.correctBoxId) {
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = "#d4af37";
-                const s = this.w * 0.18;
+                ctx.fillStyle = "#ffffff";
+                const s = this.w * 0.2;
                 ctx.beginPath();
                 ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
-                ctx.lineTo(s*0.5, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.5, 0);
+                ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.6, 0);
                 ctx.lineTo(-s, -s*0.5); ctx.closePath();
                 ctx.fill();
+                // Goldener Akzentpunkt
+                ctx.fillStyle = "#c5a059";
+                ctx.beginPath(); ctx.arc(0, s*0.2, 3, 0, Math.PI*2); ctx.fill();
             }
             ctx.restore();
         }
@@ -143,7 +142,7 @@
 
     function buildRound() {
         let boxesData = [];
-        const areaSize = 750;
+        const areaSize = 700;
         const maxInRow = 5;
         const cols = Math.min(maxInRow, Math.ceil(Math.sqrt(state.boxCount)));
         const rows = Math.ceil(state.boxCount / cols);
@@ -157,13 +156,13 @@
 
         for (let i = 0; i < state.boxCount; i++) {
             const r = Math.floor(i / cols), c = i % cols;
-            boxesData.push(new WatchBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
+            boxesData.push(new LuxuryBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
         }
         boxes = boxesData;
         state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        state.swapsRemaining = 3 + Math.floor(state.score * 0.4);
+        state.swapsRemaining = 4 + Math.floor(state.score * 0.5);
         setPhase("show");
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1300);
+        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1400);
     }
 
     function shuffle() {
@@ -206,7 +205,7 @@
 
     function endGame() {
         state.running = false;
-        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_boutique_best", state.best); document.getElementById("bestValue").textContent = state.best; }
+        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_final_best", state.best); document.getElementById("bestValue").textContent = state.best; }
         document.getElementById("finalScore").textContent = state.score;
         document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
