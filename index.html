@@ -3,101 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MG PRECISION | CORPORATE EDITION</title>
+    <title>MG PRECISION | FINAL CONTRAST</title>
     <style>
-        :root { 
-            --mg-dark: #343536; /* Das Graphit aus dem MG Header */
-            --mg-light: #f1f1f1; /* Das helle Graubeige aus dem Shop-Body */
-            --mg-gold: #c5a059; 
-            --mg-accent: #ffffff;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { --mg-dark: #343536; --mg-gold: #c5a059; --mg-bg: #e0e0e0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background: var(--mg-light); 
-            color: var(--mg-dark); 
-            height: 100vh; 
-            width: 100vw;
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        body { background: var(--mg-bg); color: #000; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HUD - Exakt im Stil des MG Menüs */
+        /* HUD - Schwarz wie der MG Header */
         .hud { 
-            position: absolute; top: 0; left: 0; right: 0;
-            z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 0; padding: 15px; background: var(--mg-dark);
-            border-bottom: 2px solid var(--mg-gold);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: #000; color: #fff; display: grid; grid-template-columns: repeat(3, 1fr); 
+            padding: 15px; border-bottom: 3px solid var(--mg-gold); z-index: 20;
         }
-        .stat { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
-        .stat:last-child { border-right: none; }
-        .stat .label { font-size: 8px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
-        .stat .value { font-size: 18px; font-weight: bold; color: #fff; }
+        .stat { text-align: center; }
+        .stat .label { font-size: 9px; text-transform: uppercase; color: var(--mg-gold); letter-spacing: 1px; }
+        .stat .value { font-size: 20px; font-weight: bold; }
 
-        /* Spielfeld */
+        /* Game Shell - Zwingt alles in die Mitte */
         .game-shell { 
-            flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            width: 100%; height: 100%; padding-top: 60px;
+            flex-grow: 1; display: flex; justify-content: center; align-items: center; 
+            position: relative; width: 100%; height: 100%; 
         }
         canvas { 
-            max-width: 95vw; max-height: 75vh; cursor: pointer; 
+            background: #fff; /* Weißes Canvas auf grauem Grund für 100% Sichtbarkeit */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 95vw; max-height: 70vh; cursor: pointer;
         }
 
-        /* Overlays - Im edlen MG Look */
         .overlay { 
-            position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); 
-            display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; 
+            position: absolute; inset: 0; background: rgba(0,0,0,0.85); 
+            display: flex; align-items: center; justify-content: center; z-index: 100;
         }
         .overlay.hidden { display: none !important; }
+        .card { max-width: 400px; width: 90%; background: #fff; padding: 40px; text-align: center; border-radius: 4px; }
         
-        .card { 
-            max-width: 420px; width: 90%; border-top: 4px solid var(--mg-gold); 
-            padding: 40px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        
-        h1 { font-size: 22px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 25px; color: var(--mg-dark); font-weight: 900; }
-        
-        .btn { 
-            background: var(--mg-dark); color: #fff; border: none; padding: 16px; 
-            font-weight: 700; text-transform: uppercase; letter-spacing: 2px; 
-            cursor: pointer; width: 100%; margin-bottom: 15px; transition: 0.2s;
-        }
-        .btn:hover { background: var(--mg-gold); }
-
-        .dev-link { 
-            color: #999; text-decoration: none; font-size: 11px; font-weight: bold;
-            letter-spacing: 1px; display: block; margin-top: 15px;
-        }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #000; }
+        .btn { background: #000; color: #fff; border: none; padding: 18px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .dev-link { color: #666; font-size: 11px; text-decoration: none; display: block; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-    
     <section class="hud">
         <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">0</div></div>
-        <div class="stat"><div class="label">Units</div><div class="value" id="boxValue">2</div></div>
-        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
+        <div class="stat"><div class="label">Rekord</div><div class="value" id="bestValue">0</div></div>
+        <div class="stat"><div class="label">Kisten</div><div class="value" id="boxValue">2</div></div>
     </section>
 
     <main class="game-shell">
-        <canvas id="gameCanvas" width="900" height="900"></canvas>
-        
+        <canvas id="gameCanvas" width="800" height="800"></canvas>
         <div class="overlay" id="startOverlay">
             <div class="card">
                 <h1>THE CHALLENGE</h1>
-                <button class="btn" id="startBtn">MISSION STARTEN</button>
+                <button class="btn" id="startBtn">START</button>
                 <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">GET THIS TOOL</a>
             </div>
         </div>
-
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:#c92a2a;">FOKUS VERLOREN</h1>
-                <div id="finalScore" style="font-size:60px; color:var(--mg-dark); margin:10px 0; font-weight:900;">0</div>
+                <h1 style="color:red;">VERLOREN</h1>
+                <div id="finalScore" style="font-size:60px; font-weight:bold; margin:10px 0;">0</div>
                 <button class="btn" id="restartBtn">RETRY</button>
-                <a href="https://marcgebauer.com" target="_blank" style="color:var(--mg-gold); text-decoration:none; font-weight:bold; font-size:12px; letter-spacing:1px; text-transform:uppercase;">MarcGebauer.com</a>
+                <a href="https://marcgebauer.com" target="_blank" style="color:#000; font-weight:bold;">MARCGEBAUER.COM</a>
             </div>
         </div>
     </main>
@@ -105,122 +71,80 @@
 <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    
-    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_corp_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
+    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_final_v1")||0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
     document.getElementById("bestValue").textContent = state.best;
 
-    class MGBox {
-        constructor(id, x, y, size) {
-            this.id = id; this.x = x; this.y = y; this.w = size; this.h = size; this.lift = 0;
-        }
+    class Box {
+        constructor(id, x, y, size) { this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; this.lift=0; }
         draw() {
-            ctx.save();
-            ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
-            
-            // Box Design: Das Graphit-Grau aus dem MG Header
-            ctx.fillStyle = "#343536";
-            ctx.strokeStyle = "#c5a059";
-            ctx.lineWidth = 2;
+            ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
+            ctx.fillStyle = "#000"; // Knallharte schwarze Kiste
             ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-            ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
-            
-            // Krone (In Weiß/Gold für den Kontrast auf Dunkelgrau)
-            if ((state.phase === "show" || state.phase === "reveal") && this.id === state.correctBoxId) {
-                ctx.fillStyle = "#ffffff";
-                const s = this.w * 0.18;
-                ctx.beginPath();
-                ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.4);
-                ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.3); ctx.lineTo(-s*0.6, 0);
-                ctx.lineTo(-s, -s*0.4); ctx.closePath();
-                ctx.fill();
+            if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
+                ctx.fillStyle="#fff"; // Weiße Krone
+                const s = this.w*0.2; ctx.beginPath();
+                ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
+                ctx.lineTo(s*0.5, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.5, 0);
+                ctx.lineTo(-s, -s*0.5); ctx.closePath(); ctx.fill();
             }
             ctx.restore();
         }
     }
 
     function buildRound() {
-        let boxesData = [];
-        const areaSize = 750;
-        const maxInRow = 5;
-        const cols = Math.min(maxInRow, Math.ceil(Math.sqrt(state.boxCount)));
-        const rows = Math.ceil(state.boxCount / cols);
-        const boxSize = (areaSize / maxInRow) - 20; 
-        const spacing = 20;
-        
-        const totalW = cols * boxSize + (cols - 1) * spacing;
-        const totalH = rows * boxSize + (rows - 1) * spacing;
-        const startX = (canvas.width - totalW) / 2;
-        const startY = (canvas.height - totalH) / 2;
-
-        for (let i = 0; i < state.boxCount; i++) {
-            const r = Math.floor(i / cols), c = i % cols;
-            boxesData.push(new MGBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
-        }
-        boxes = boxesData;
-        state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        state.swapsRemaining = 4 + Math.floor(state.score * 0.4);
-        setPhase("show");
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1300);
+        let b = []; const area=600, maxR=5, cols=Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))), rows=Math.ceil(state.boxCount/cols);
+        const s=(area/maxR)-20, sp=20, tw=cols*s+(cols-1)*sp, th=rows*s+(rows-1)*sp;
+        const sx=(canvas.width-tw)/2, sy=(canvas.height-th)/2;
+        for(let i=0; i<state.boxCount; i++) { const r=Math.floor(i/cols), c=i%cols; b.push(new Box(i, sx+c*(s+sp), sy+r*(s+sp), s)); }
+        boxes = b; state.correctBoxId=Math.floor(Math.random()*state.boxCount);
+        state.swapsRemaining=3+Math.floor(state.score*0.4); setPhase("show");
+        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1200);
     }
 
     function shuffle() {
-        if (state.swapsRemaining <= 0) { setPhase("pick"); return; }
-        let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
-        while(a === b) b = Math.floor(Math.random() * boxes.length);
-        state.activeSwap = { aIdx: a, bIdx: b, startAX: boxes[a].x, startAY: boxes[a].y, startBX: boxes[b].x, startBY: boxes[b].y, progress: 0, speed: 0.032 + (state.score * 0.001) };
+        if(state.swapsRemaining<=0) { setPhase("pick"); return; }
+        let a=Math.floor(Math.random()*boxes.length), b=Math.floor(Math.random()*boxes.length);
+        while(a===b) b=Math.floor(Math.random()*boxes.length);
+        state.activeSwap = { aIdx:a, bIdx:b, sax:boxes[a].x, say:boxes[a].y, sbx:boxes[b].x, sby:boxes[b].y, p:0, spd:0.03+(state.score*0.001) };
         state.swapsRemaining--;
     }
 
-    function setPhase(p) { state.phase = p; state.phaseStartedAt = performance.now(); }
-
+    function setPhase(p) { state.phase=p; state.phaseStartedAt=performance.now(); }
     function update() {
-        if (state.phase === "shuffle") {
-            if (!state.activeSwap) shuffle();
+        if(state.phase==="shuffle") {
+            if(!state.activeSwap) shuffle();
             else {
-                state.activeSwap.progress += state.activeSwap.speed;
-                const p = Math.min(1, state.activeSwap.progress);
-                const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-                boxes[state.activeSwap.aIdx].x = state.activeSwap.startAX + (state.activeSwap.startBX - state.activeSwap.startAX) * ease;
-                boxes[state.activeSwap.aIdx].y = state.activeSwap.startAY + (state.activeSwap.startBY - state.activeSwap.startAY) * ease;
-                boxes[state.activeSwap.bIdx].x = state.activeSwap.startBX + (state.activeSwap.startAX - state.activeSwap.startBX) * ease;
-                boxes[state.activeSwap.bIdx].y = state.activeSwap.startBY + (state.activeSwap.startAY - state.activeSwap.startBY) * ease;
-                if (p >= 1) state.activeSwap = null;
+                state.activeSwap.p += state.activeSwap.spd; const p=Math.min(1, state.activeSwap.p);
+                const ease = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2, 2)/2;
+                boxes[state.activeSwap.aIdx].x = state.activeSwap.sax+(state.activeSwap.sbx-state.activeSwap.sax)*ease;
+                boxes[state.activeSwap.aIdx].y = state.activeSwap.say+(state.activeSwap.sby-state.activeSwap.say)*ease;
+                boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx+(state.activeSwap.sax-state.activeSwap.sbx)*ease;
+                boxes[state.activeSwap.bIdx].y = state.activeSwap.sby+(state.activeSwap.say-state.activeSwap.sby)*ease;
+                if(p>=1) state.activeSwap=null;
             }
         }
-        if (state.phase === "reveal") {
-            boxes.forEach(b => { if (b.id === state.correctBoxId || b.id === state.selectedBoxId) b.lift = Math.min(45, b.lift + 5); });
-            if (performance.now() - state.phaseStartedAt > 1500) {
-                if (state.selectedBoxId === state.correctBoxId) {
-                    state.score++; state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2.2));
-                    updateHUD(); buildRound();
-                } else endGame();
+        if(state.phase==="reveal") {
+            boxes.forEach(bx => { if(bx.id===state.correctBoxId || bx.id===state.selectedBoxId) bx.lift=Math.min(40, bx.lift+5); });
+            if(performance.now()-state.phaseStartedAt > 1500) {
+                if(state.selectedBoxId===state.correctBoxId) { state.score++; state.boxCount=Math.min(25, 2+Math.floor(state.score/2)); updateHUD(); buildRound(); }
+                else endGame();
             }
         }
     }
-
-    function loop() { if (state.running || state.phase === "reveal") update(); ctx.clearRect(0, 0, canvas.width, canvas.height); boxes.forEach(b => b.draw()); requestAnimationFrame(loop); }
-    function updateHUD() { document.getElementById("scoreValue").textContent = state.score; document.getElementById("boxValue").textContent = state.boxCount; }
-
+    function loop() { if(state.running || state.phase==="reveal") update(); ctx.clearRect(0,0,canvas.width,canvas.height); boxes.forEach(bx=>bx.draw()); requestAnimationFrame(loop); }
+    function updateHUD() { document.getElementById("scoreValue").textContent=state.score; document.getElementById("boxValue").textContent=state.boxCount; }
     function endGame() {
-        state.running = false;
-        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_corp_best", state.best); document.getElementById("bestValue").textContent = state.best; }
-        document.getElementById("finalScore").textContent = state.score;
-        document.getElementById("gameOverOverlay").classList.remove("hidden");
+        state.running=false; if(state.score>state.best){state.best=state.score; localStorage.setItem("mg_final_v1", state.best); document.getElementById("bestValue").textContent=state.best;}
+        document.getElementById("finalScore").textContent=state.score; document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
-
     function handleInput(e) {
-        if (state.phase !== "pick") return;
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-        const clickX = (clientX - rect.left) * (canvas.width / rect.width);
-        const clickY = ((e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top) * (canvas.height / rect.height);
-        boxes.forEach(b => { if (clickX > b.x && clickX < b.x + b.w && clickY > b.y && clickY < b.y + b.h) { if (navigator.vibrate) navigator.vibrate(20); state.selectedBoxId = b.id; setPhase("reveal"); } });
+        if(state.phase!=="pick") return; const rect=canvas.getBoundingClientRect();
+        const cx=(e.clientX||e.touches[0].clientX-rect.left)*(canvas.width/rect.width), cy=(e.clientY||e.touches[0].clientY-rect.top)*(canvas.height/rect.height);
+        boxes.forEach(bx => { if(cx>bx.x && cx<bx.x+bx.w && cy>bx.y && cy<bx.y+bx.h) { state.selectedBoxId=bx.id; setPhase("reveal"); } });
     }
-
-    document.getElementById("startBtn").onclick = () => { document.getElementById("startOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; updateHUD(); buildRound(); };
-    document.getElementById("restartBtn").onclick = () => location.reload();
-    canvas.addEventListener("mousedown", handleInput);
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
+    document.getElementById("startBtn").onclick=()=>{ document.getElementById("startOverlay").classList.add("hidden"); state.running=true; state.score=0; state.boxCount=2; updateHUD(); buildRound(); };
+    document.getElementById("restartBtn").onclick=()=>location.reload();
+    canvas.addEventListener("mousedown", handleInput); canvas.addEventListener("touchstart", (e)=>{e.preventDefault(); handleInput(e);}, {passive:false});
     loop();
 </script>
 </body>
