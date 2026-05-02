@@ -34,33 +34,35 @@
         .overlay.hidden { display: none !important; }
         
         /* Neues Design für die Karten (Game Over Screen) */
-        .card { max-width: 450px; width: 95%; background: #fff; padding: 30px 20px; text-align: center; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        h1 { font-size: 24px; margin-bottom: 10px; color: #000; }
+        .card { max-width: 450px; width: 95%; background: #1a1a1a; padding: 30px 20px; text-align: center; border-radius: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border-top: 4px solid var(--mg-gold); color: #fff; }
+        h1 { font-size: 24px; margin-bottom: 5px; letter-spacing: 2px; }
         
         /* Leaderboard Styles */
-        .leaderboard-container { background: #f5f5f5; border-radius: 6px; padding: 15px; margin: 15px 0; border: 1px solid #ddd; }
-        .leaderboard-container h3 { font-size: 14px; color: var(--mg-gold); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .leaderboard-container { background: #222; border-radius: 6px; padding: 15px; margin: 20px 0; border: 1px solid #333; }
+        .leaderboard-container h3 { font-size: 14px; color: var(--mg-gold); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         #leaderboardList { list-style: none; margin-bottom: 15px; text-align: left; }
-        #leaderboardList li { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid #ddd; font-size: 14px; }
-        #leaderboardList li:nth-child(odd) { background: #fff; }
-        #leaderboardList li span.lb-score { font-weight: bold; color: #000; }
-        #leaderboardList li span.lb-name { color: #555; }
+        #leaderboardList li { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid #333; font-size: 14px; }
+        #leaderboardList li:nth-child(odd) { background: rgba(255,255,255,0.02); }
+        #leaderboardList li span.lb-score { font-weight: bold; color: var(--mg-gold); }
+        #leaderboardList li span.lb-name { color: #ddd; }
         
         /* Name Input Bereich */
-        #nameInputSection { display: flex; gap: 10px; margin-top: 15px; }
-        #playerName { flex-grow: 1; padding: 10px; border: 2px solid #ccc; border-radius: 4px; font-size: 14px; text-align: center; }
-        #submitScoreBtn { background: #000; color: #fff; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        #nameInputSection { display: flex; gap: 8px; margin-top: 15px; }
+        #playerName { flex-grow: 1; padding: 12px; background: #111; border: 1px solid #444; border-radius: 4px; font-size: 14px; text-align: center; color: #fff; outline: none; transition: border-color 0.2s; }
+        #playerName:focus { border-color: var(--mg-gold); }
+        #submitScoreBtn { background: var(--mg-gold); color: #000; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; }
+        #submitScoreBtn:hover { opacity: 0.9; }
 
         /* Button Hierarchie: Kollektion RIESIG, Retry kleiner */
-        .btn { border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px; border-radius: 4px; transition: transform 0.1s; }
+        .btn { border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px; border-radius: 4px; transition: transform 0.1s, opacity 0.2s; }
         .btn:active { transform: scale(0.98); }
+        .btn:hover { opacity: 0.9; }
         
         .btn-collection { 
-            background: var(--mg-gold); color: #000; font-size: 20px; padding: 22px; 
-            text-transform: uppercase; box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4); 
-            border: 2px solid #000;
+            background: var(--mg-gold); color: #000; font-size: 18px; padding: 20px; 
+            text-transform: uppercase; box-shadow: 0 4px 15px rgba(197, 160, 89, 0.2); 
         }
-        .btn-retry { background: #343536; color: #fff; font-size: 14px; padding: 12px; }
+        .btn-retry { background: #333; color: #fff; font-size: 14px; padding: 12px; border: 1px solid #444; }
         
     </style>
 </head>
@@ -76,17 +78,17 @@
         
         <div class="overlay" id="startOverlay">
             <div class="card">
-                <h1>THE CHALLENGE</h1>
-                <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Finde die Kiste mit der Krone.</p>
+                <h1 style="color: #fff;">THE CHALLENGE</h1>
+                <p style="font-size: 12px; color: #aaa; margin-bottom: 20px;">Finde die Kiste mit der Krone.</p>
                 <button class="btn btn-collection" id="startBtn">SPIEL STARTEN</button>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:red; font-size: 20px;">VERLOREN</h1>
-                <div id="finalScore" style="font-size:45px; font-weight:bold; margin:0;">0</div>
-                <div style="font-size: 10px; color: #666; margin-bottom: 10px;">DEIN SCORE</div>
+                <h1 style="color:#ff4444; font-size: 22px;">VERLOREN</h1>
+                <div id="finalScore" style="font-size:55px; font-weight:bold; margin:0; color: var(--mg-gold); line-height: 1.1;">0</div>
+                <div style="font-size: 11px; color: #888; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">DEIN SCORE</div>
 
                 <div class="leaderboard-container">
                     <h3>TOP 5 RANGKAMPF</h3>
