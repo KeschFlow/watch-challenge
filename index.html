@@ -491,9 +491,18 @@
         const success = await saveScoreToDB(name, state.score);
         
         if (success) {
-            document.getElementById("saveScoreSection").style.display = "none";
-            nameInput.value = ""; 
-            btn.textContent = "INS RANKING AUFNEHMEN"; btn.disabled = false;
+            // EGO TRIGGER: STATUS FEEDBACK
+            const rank = globalLeaderboard.findIndex(e => e.uid === currentUser.uid) + 1;
+            const rankDisplay = rank > 0 ? `PLATZ #${rank} GESICHERT` : "GESPEICHERT!";
+            btn.textContent = rankDisplay;
+            
+            setTimeout(() => {
+                document.getElementById("saveScoreSection").style.display = "none";
+                nameInput.value = ""; 
+                btn.textContent = "INS RANKING AUFNEHMEN"; btn.disabled = false;
+            }, 2500);
+        } else {
+            btn.textContent = "FEHLER. NOCHMAL."; btn.disabled = false;
         }
     });
 
