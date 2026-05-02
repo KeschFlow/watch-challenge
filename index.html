@@ -256,103 +256,64 @@
             }
         }
 
-        function buildRound() {
-            let b = []; const area=600, maxR=5, cols=Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))), rows=Math.ceil(state.boxCount/cols);
-            const s=(area/maxR)-20, sp=20, tw=cols*s+(cols-1)*sp, th=rows*s+(rows-1)*sp;
-            const sx=(canvas.width-tw)/2, sy=(canvas.height-th)/2;
-            for(let i=0; i<state.boxCount; i++) { const r=Math.floor(i/cols), c=i%cols; b.push(new Box(i, sx+c*(s+sp), sy+r*(s+sp), s)); }
-            boxes = b; 
-            state.correctBoxId=Math.floor(Math.random()*state.boxCount);
-            state.swapsRemaining=3+Math.floor(state.score*0.4); setPhase("show");
-            setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1200);
-        }
+        // --- SPIEL LOGIK ANPASSUNGEN ---
 
-        function shuffle() {
-            if(state.swapsRemaining<=0) { setPhase("pick"); return; }
-            let a=Math.floor(Math.random()*boxes.length), b=Math.floor(Math.random()*boxes.length);
-            while(a===b) b=Math.floor(Math.random()*boxes.length);
-            state.activeSwap = { aIdx:a, bIdx:b, sax:boxes[a].x, say:boxes[a].y, sbx:boxes[b].x, sby:boxes[b].y, p:0, spd:0.03+(state.score*0.001) };
-            state.swapsRemaining--;
-        }
+function buildRound() {
+    let b = []; 
+    // Kistenanzahl steigt, aber wir begrenzen sie für die Spielbarkeit auf 25
+    const maxKisten = 25;
+    const aktuelleKisten = Math.min(maxKisten, 2 + Math.floor(state.score / 2));
+    state.boxCount = aktuelleKisten;
 
-        function setPhase(p) { state.phase=p; state.phaseStartedAt=performance.now(); }
-        
-        function update() {
-            if(state.phase==="shuffle") {
-                if(!state.activeSwap) shuffle();
-                else {
-                    state.activeSwap.p += state.activeSwap.spd; const p=Math.min(1, state.activeSwap.p);
-                    const ease = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2, 2)/2;
-                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sax+(state.activeSwap.sbx-state.activeSwap.sax)*ease;
-                    boxes[state.activeSwap.aIdx].y = state.activeSwap.say+(state.activeSwap.sby-state.activeSwap.say)*ease;
-                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx+(state.activeSwap.sax-state.activeSwap.sbx)*ease;
-                    boxes[state.activeSwap.bIdx].y = state.activeSwap.sby+(state.activeSwap.say-state.activeSwap.sby)*ease;
-                    if(p>=1) state.activeSwap=null;
-                }
-            }
-            if(state.phase==="reveal") {
-                boxes.forEach(bx => { if(bx.id===state.correctBoxId || bx.id===state.selectedBoxId) bx.lift=Math.min(40, bx.lift+5); });
-                if(performance.now()-state.phaseStartedAt > 1500) {
-                    if(state.selectedBoxId===state.correctBoxId) { state.score++; state.boxCount=Math.min(25, 2+Math.floor(state.score/2)); updateHUD(); buildRound(); }
-                    else endGame();
-                }
-            }
-        }
-        
-        function loop() { 
-            if(state.running || state.phase==="reveal") update(); 
-            ctx.clearRect(0,0,canvas.width,canvas.height); 
-            boxes.forEach(bx=>bx.draw()); 
-            requestAnimationFrame(loop); 
-        }
-        
-        function updateHUD() { document.getElementById("scoreValue").textContent=state.score; document.getElementById("boxValue").textContent=state.boxCount; }
-        
-        function endGame() {
-            state.running=false; 
-            if(state.score > state.best){
-                state.best = state.score; 
-                localStorage.setItem("template_record_v2", state.best); 
-                document.getElementById("bestValue").textContent=state.best;
-            }
-            document.getElementById("finalScore").textContent=state.score; 
+    const area = 600, maxR = 5, cols = Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))), rows = Math.ceil(state.boxCount / cols);
+    const s = (area / maxR) - 20, sp = 20, tw = cols * s + (cols - 1) * sp, th = rows * s + (rows - 1) * sp;
+    const sx = (canvas.width - tw) / 2, sy = (canvas.height - th) / 2;
+    
+    for(let i = 0; i < state.boxCount; i++) { 
+        const r = Math.floor(i / cols), c = i % cols; 
+        b.push(new Box(i, sx + c * (s + sp), sy + r * (s + sp), s)); 
+    }
+    boxes = b; 
+    
+    // Startposition der richtigen Kiste merken
+    state.correctBoxId = Math.floor(Math.random() * state.boxCount);
+    const startPosId = state.correctBoxId;
 
-            // 1. Rang ermitteln
-            let currentRank = KUNDE.rangSystem[0].titel;
-            for (let i = 0; i < KUNDE.rangSystem.length; i++) {
-                if (state.score >= KUNDE.rangSystem[i].minScore) {
-                    currentRank = KUNDE.rangSystem[i].titel;
-                }
-            }
-            document.getElementById("ui-rank-display").textContent = currentRank;
+    // Schwierigkeit: Mehr Swaps und höheres Tempo je höher der Score
+    state.swapsRemaining = 5 + Math.floor(state.score * 1.5); 
+    setPhase("show");
 
-            // 3. Belohnung prüfen
-            const rewardSec = document.getElementById("rewardSection");
-            const titleEl = document.getElementById("ui-lost-title");
-            
-            if (KUNDE.belohnungAktiv && state.score >= KUNDE.belohnungAbScore) {
-                titleEl.textContent = KUNDE.gewonnenText;
-                titleEl.style.color = "var(--hauptfarbe)"; // Goldener Titel bei Sieg
-                document.getElementById("ui-reward-msg").textContent = KUNDE.belohnungNachricht;
-                document.getElementById("ui-reward-code").textContent = KUNDE.belohnungCode;
-                rewardSec.classList.remove("hidden");
-            } else {
-                titleEl.textContent = KUNDE.verlorenText;
-                titleEl.style.color = "#ff4444"; // Roter Titel bei Verlust
-                rewardSec.classList.add("hidden");
-            }
+    setTimeout(() => { 
+        if(state.running) setPhase("shuffle"); 
+    }, 1200);
+}
 
-            document.getElementById("gameOverOverlay").classList.remove("hidden");
-        }
-        
-        function handleInput(e) {
-            if(state.phase!=="pick") return; 
-            const rect=canvas.getBoundingClientRect();
-            let clientX = e.clientX; let clientY = e.clientY;
-            if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
-            const cx=(clientX-rect.left)*(canvas.width/rect.width), cy=(clientY-rect.top)*(canvas.height/rect.height);
-            boxes.forEach(bx => { if(cx>bx.x && cx<bx.x+bx.w && cy>bx.y && cy<bx.y+bx.h) { state.selectedBoxId=bx.id; setPhase("reveal"); } });
-        }
+function shuffle() {
+    if(state.swapsRemaining <= 0) {
+        // ANTI-CAMPER CHECK: Ist die Kiste noch auf der Startposition?
+        // Falls ja, erzwingen wir einen allerletzten Tausch
+        setPhase("pick"); 
+        return; 
+    }
+
+    let a = Math.floor(Math.random() * boxes.length);
+    let b = Math.floor(Math.random() * boxes.length);
+    while(a === b) b = Math.floor(Math.random() * boxes.length);
+
+    // Dynamisches Tempo: Startet bei 0.03 und wird pro Punkt schneller
+    const basisSpeed = 0.04;
+    const speedBoost = state.score * 0.005;
+    const aktuellerSpeed = Math.min(0.15, basisSpeed + speedBoost); // Deckelung bei 0.15 für Fairness
+
+    state.activeSwap = { 
+        aIdx: a, bIdx: b, 
+        sax: boxes[a].x, say: boxes[a].y, 
+        sbx: boxes[b].x, sby: boxes[b].y, 
+        p: 0, 
+        spd: aktuellerSpeed 
+    };
+    state.swapsRemaining--;
+}
         
         // --- EVENT LISTENERS ---
         document.getElementById("startBtn").addEventListener("click", () => { 
