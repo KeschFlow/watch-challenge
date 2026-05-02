@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MG PRECISION | FOCUS CHALLENGE</title>
+    <title>MG PRECISION | FOCUS SYSTEM</title>
     <style>
         :root { 
             --mg-dark: #343536; 
             --mg-light: #f1f1f1; 
             --mg-gold: #c5a059; 
             --mg-box: #222222;
+            --danger: #c92a2a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -20,7 +21,7 @@
         .hud { 
             position: absolute; top: 0; left: 0; right: 0;
             z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 0; padding: 15px; background: var(--mg-dark);
+            gap: 0; padding: 12px 15px; background: var(--mg-dark);
             border-bottom: 3px solid var(--mg-gold);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
@@ -28,31 +29,49 @@
         .stat:last-child { border-right: none; }
         .stat .label { font-size: 9px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
         .stat .value { font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        
+        /* EDDIE LIVE FEEDBACK */
+        .eddie-live {
+            position: absolute; top: 75px; left: 0; right: 0; text-align: center;
+            font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
+            color: #888; z-index: 15; height: 15px; transition: color 0.3s, opacity 0.3s;
+        }
+
         .streak-fire { color: #e67e22; font-size: 16px; animation: pulseFire 1.5s infinite alternate; }
 
         /* Spielfeld */
-        .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 60px; }
+        .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 60px; transition: transform 0.3s cubic-bezier(.17,.67,.83,.67); }
+        .game-shell.pick-tension { transform: scale(1.03); } /* MICRO-TENSION ZOOM */
+        
         canvas { max-width: 95vw; max-height: 75vh; cursor: pointer; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); }
 
         /* Overlays */
         .overlay { position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
         .overlay.hidden { display: none !important; }
         
-        .card { max-width: 440px; width: 100%; border-top: 4px solid var(--mg-gold); padding: 35px 25px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border-radius: 2px; }
+        .card { max-width: 440px; width: 100%; border-top: 4px solid var(--mg-gold); padding: 35px 25px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border-radius: 2px; position: relative; }
         
         h1 { font-size: 24px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; color: var(--mg-dark); font-weight: 900; }
         .subtitle { font-size: 10px; color: #888; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; }
+        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; position: relative; overflow: hidden; }
         .btn:hover { background: var(--mg-gold); }
         .btn-gold { background: var(--mg-gold); color: #000; }
         .btn-outline { background: #fff; color: var(--mg-dark); border: 2px solid var(--mg-dark); padding: 12px; font-size: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* NETWORKING FOOTER */
-        .networking-footer { margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
-        .networking-footer p { font-size: 8px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
-        .dev-link { color: var(--mg-dark); text-decoration: none; font-size: 12px; font-weight: 900; letter-spacing: 2px; display: block; text-transform: uppercase; }
-        .dev-link:hover { color: var(--mg-gold); }
+        /* Identity Tags */
+        .identity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid var(--mg-gold); }
+        .id-stat { text-align: left; }
+        .id-stat span { display: block; font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+        .id-stat strong { display: block; font-size: 14px; color: var(--mg-dark); font-weight: 900; }
+
+        /* HARD VIRAL LOCK SYSTEM */
+        .lock-container { position: relative; margin-bottom: 20px; }
+        .locked-content { filter: blur(6px); pointer-events: none; user-select: none; opacity: 0.6; transition: 0.5s; }
+        .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        .lock-icon { font-size: 24px; margin-bottom: 10px; }
+        .unlocked .locked-content { filter: blur(0); pointer-events: auto; opacity: 1; }
+        .unlocked .lock-overlay { display: none; }
 
         /* Leaderboard UI */
         .lb-container { margin: 25px 0; border: 1px solid #ddd; padding: 15px; background: #fafafa; border-radius: 4px; }
@@ -73,30 +92,31 @@
         @keyframes flashBg { 0% { background-color: var(--mg-gold); } 100% { background-color: var(--mg-light); } }
         .hard-mode-flash { animation: flashBg 0.4s ease-out; }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-15px); }
-            40%, 80% { transform: translateX(15px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
         .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        /* Quick Retry prompt */
+        .quick-retry { font-size: 10px; color: var(--danger); font-weight: 900; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; animation: pulseFire 1s infinite alternate; cursor: pointer; }
     </style>
 </head>
 <body>
     <section class="hud">
-        <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">0</div></div>
+        <div class="stat"><div class="label">System Score</div><div class="value" id="scoreValue">0</div></div>
         <div class="stat"><div class="label">Daily Streak</div><div class="value" id="streakValue"><span class="streak-fire">🔥</span><span id="streakCount">0</span></div></div>
         <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
+    
+    <div id="eddieLiveQuote" class="eddie-live"></div>
 
     <main class="game-shell" id="gameShell">
         <canvas id="gameCanvas"></canvas>
         
         <div class="overlay" id="startOverlay">
             <div class="card">
-                <h1>THE CHALLENGE</h1>
+                <h1>FOCUS SYSTEM</h1>
                 <p class="subtitle">MARC GEBAUER x EDDIE'S WORLD</p>
                 
-                <button class="btn" id="startBtn">FOKUS STARTEN</button>
+                <button class="btn" id="startBtn">SYSTEM STARTEN</button>
                 
                 <div class="lb-container">
                     <div class="lb-title">ELITE RANKING</div>
@@ -104,41 +124,46 @@
                         <li class="lb-loading">Lade Ranking...</li>
                     </ul>
                 </div>
-
-                <div class="networking-footer">
-                    <p>Engine built by</p>
-                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">KEVIN SCHULZE</a>
-                </div>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:#c92a2a; margin-bottom:5px;">FOKUS VERLOREN</h1>
+                <h1 style="color:var(--danger); margin-bottom:5px;">SYSTEM FAILED</h1>
+                <p id="eddieQuote" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;"></p>
                 
-                <!-- BRAND & IDENTITY LAYER -->
-                <div id="rankDisplay" style="font-size: 16px; font-weight: 900; color: var(--mg-gold); letter-spacing: 3px; margin-top: 10px;">RANK: FOCUSED</div>
-                <p id="eddieQuote" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4; min-height: 36px;"></p>
+                <div id="finalScore" style="font-size:70px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
                 
-                <div id="finalScore" style="font-size:80px; font-weight:900; margin:10px 0; color: var(--mg-dark);">0</div>
+                <!-- IDENTITY LAYER -->
+                <div class="identity-grid">
+                    <div class="id-stat"><span>Class</span><strong id="idClass">DISTRACTED</strong></div>
+                    <div class="id-stat"><span>Avg React</span><strong id="idReact">0ms</strong></div>
+                    <div class="id-stat"><span>Percentile</span><strong id="idPercentile">Top 99%</strong></div>
+                    <div class="id-stat"><span>Status</span><strong id="idStatus" style="color:var(--mg-gold)">UNVERIFIED</strong></div>
+                </div>
                 
-                <!-- SOCIAL PROOF -->
-                <p id="percentileDisplay" style="font-size: 11px; color: #888; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;"></p>
-                
-                <div id="shareSection" style="margin-bottom: 20px;">
-                    <button class="btn btn-outline" id="shareBtn" style="width: 100%;">EGO BEWEISEN (SHARE)</button>
+                <!-- HARD VIRAL LOCK SYSTEM -->
+                <div id="viralLockContainer" class="lock-container">
+                    <div class="lock-overlay" id="lockOverlay">
+                        <div class="lock-icon">🔒</div>
+                        <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px; color: #000; text-transform: uppercase;">Ranking Locked.</p>
+                        <button class="btn btn-gold" id="shareBtnUnlock" style="margin-bottom:0;">EGO BEWEISEN (SHARE)</button>
+                    </div>
+                    
+                    <div class="locked-content" id="saveScoreSection">
+                        <p style="font-size: 12px; font-weight: 900; margin-bottom: 10px; color: var(--mg-dark); text-transform: uppercase;">SPOT SICHERN:</p>
+                        <input type="text" id="nameInput" placeholder="INSTAGRAM ODER WHATSAPP" maxlength="30" autocomplete="off">
+                        <button class="btn btn-outline" id="saveBtn">INS RANKING AUFNEHMEN</button>
+                    </div>
                 </div>
 
-                <!-- LEAD GEN: SHARE-GATED -->
-                <div id="saveScoreSection" style="display: none; margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-                    <p style="font-size: 13px; font-weight: 900; margin-bottom: 15px; color: var(--mg-gold); text-transform: uppercase;">TOP TIER REACHED.<br>SICHERE DIR DEINEN SPOT.</p>
-                    <input type="text" id="nameInput" placeholder="DEIN NAME ODER INSTA-HANDLE" maxlength="20" autocomplete="off">
-                    <button class="btn btn-gold" id="saveBtn">INS RANKING AUFNEHMEN</button>
+                <div id="standardShare" style="display:none; margin-bottom: 15px;">
+                    <button class="btn btn-outline" id="shareBtnStandard">EGO BEWEISEN (SHARE)</button>
                 </div>
 
-                <button class="btn" id="restartBtn">RETRY</button>
-                <p style="font-size:11px; margin-top:15px; color:#888; text-transform:uppercase; letter-spacing:1px; font-weight:900;">Fokus ist kein Talent.<br>Es ist Entscheidung.</p>
-                <a href="https://marcgebauer.com" target="_blank" style="color:var(--mg-dark); font-weight:bold; text-decoration:none; display:block; margin-top:15px; font-size:12px; text-transform:uppercase;">MARCGEBAUER.COM</a>
+                <button class="btn" id="restartBtn">SYSTEM REBOOT</button>
+                <div class="quick-retry" id="quickRetryText" style="display:none;"></div>
+                <a href="https://marcgebauer.com" target="_blank" style="color:#aaa; font-weight:bold; text-decoration:none; display:block; margin-top:20px; font-size:10px; text-transform:uppercase;">MARCGEBAUER.COM</a>
             </div>
         </div>
     </main>
@@ -186,7 +211,7 @@
 
     function renderLeaderboard() {
         const listEl = document.getElementById("startLeaderboard");
-        if (globalLeaderboard.length === 0) { listEl.innerHTML = '<li class="lb-loading">Noch keine Einträge. Sei der Erste!</li>'; return; }
+        if (globalLeaderboard.length === 0) { listEl.innerHTML = '<li class="lb-loading">Noch keine Einträge.</li>'; return; }
         
         let html = "";
         globalLeaderboard.forEach((entry, index) => {
@@ -204,18 +229,17 @@
 
     async function saveScoreToDB(playerName, finalScore) {
         if (!currentUser || finalScore < 1) return false; 
-        if (playerName.length < 2 || !/^[a-zA-Z0-9 _@.]+$/.test(playerName)) {
-            const btn = document.getElementById("saveBtn"); btn.textContent = "UNGUELTIGER NAME";
+        if (playerName.length < 2) {
+            const btn = document.getElementById("saveBtn"); btn.textContent = "INVALID DATA";
             setTimeout(() => { btn.textContent = "INS RANKING AUFNEHMEN"; btn.disabled = false; }, 2000);
             return false;
         }
-        if (finalScore > 150) return false; 
         const existing = globalLeaderboard.find(e => e.uid === currentUser.uid);
         if (existing && existing.score >= finalScore) return true;
 
         const userDocRef = doc(db, 'leaderboard', currentUser.uid);
         try {
-            await setDoc(userDocRef, { name: playerName, score: finalScore, uid: currentUser.uid, timestamp: Date.now() }, { merge: true }); 
+            await setDoc(userDocRef, { name: playerName, score: finalScore, uid: currentUser.uid, timestamp: Date.now(), class: document.getElementById("idClass").textContent }, { merge: true }); 
             return true;
         } catch (e) { return false; }
     }
@@ -223,11 +247,10 @@
     function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
 
 
-    // --- GAME ENGINE & ADDICTIVE LOOP V2 ---
+    // --- BEHAVIOR ENGINE V2 ---
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    // MICRO JUICE: AUDIO ENGINE (No external files needed)
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx;
     function initAudio() { if(!audioCtx) audioCtx = new AudioContext(); }
@@ -236,8 +259,7 @@
         if(!audioCtx || audioCtx.state === 'suspended') return;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(vol, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -250,23 +272,18 @@
 
     function fxWinVisual() {
         const shell = document.getElementById("gameShell");
-        shell.style.transition = "background-color 0.1s ease";
         shell.style.backgroundColor = "var(--mg-gold)";
-        setTimeout(() => {
-            shell.style.transition = "background-color 0.4s ease";
-            shell.style.backgroundColor = "transparent";
-        }, 120);
+        setTimeout(() => { shell.style.backgroundColor = "transparent"; }, 120);
     }
 
-    // STREAK ENGINE
     let currentStreak = parseInt(localStorage.getItem('mg_streak')) || 0;
     let lastPlayed = localStorage.getItem('mg_lastPlayed');
     let today = new Date().toDateString();
     
     if (lastPlayed !== today) {
         let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (lastPlayed === yesterday.toDateString()) { currentStreak++; } // Kept streak alive!
-        else { currentStreak = 1; } // Broken or first time
+        if (lastPlayed === yesterday.toDateString()) { currentStreak++; } 
+        else { currentStreak = 1; } 
         localStorage.setItem('mg_streak', currentStreak);
         localStorage.setItem('mg_lastPlayed', today);
     }
@@ -274,30 +291,27 @@
 
     let boxes = [];
     let state = { 
-        running: false, score: 0, boxCount: 2, 
-        combo: 0, // DOPAMIN COMBO ENGINE
+        running: false, score: 0, boxCount: 2, combo: 0,
         best: localStorage.getItem("mg_net_best") || 0, 
-        phase: "idle", phaseStartedAt: 0, 
+        phase: "idle", phaseStartedAt: 0, pickStartTime: 0,
         correctBoxId: null, selectedBoxId: null, 
-        swapsRemaining: 0, activeSwap: null,
-        hardModeTriggered: false
+        swapsRemaining: 0, activeSwap: null, hardModeTriggered: false,
+        reactionTimes: [], totalSwaps: 0
     };
 
-    // RANK & RETENTION ENGINE
     let lowScoreStreak = parseInt(localStorage.getItem('mg_lowScore')) || 0;
-    const eddieQuotes = [
-        "Eddie hätte das gehalten.",
-        "Zu langsam. Eddie wartet nicht.",
-        "Fokus verloren. Realität auch?",
-        "Die Kiste ist zu. Und dein Fokus weg."
-    ];
 
-    function getRankName(s) {
-        if (s < 5) return "DISTRACTED";
-        if (s < 12) return "AWARE";
-        if (s < 25) return "FOCUSED";
-        if (s < 45) return "DANGEROUS";
-        return "PRECISION ELITE";
+    // ADAPTIVE EDDIE SYSTEM VOICE
+    function eddieLiveFeedback(type, reactTime = 0) {
+        const el = document.getElementById("eddieLiveQuote");
+        el.style.opacity = 0;
+        setTimeout(() => {
+            if (type === "slow") { el.textContent = "Zu langsam. Das war geraten."; el.style.color = "var(--danger)"; }
+            if (type === "fast") { el.textContent = "Guter Instinkt. Aber hältst du das?"; el.style.color = "var(--mg-gold)"; }
+            if (type === "missclick") { el.textContent = "Geduld. Eddie wartet auf den richtigen Moment."; el.style.color = "var(--danger)"; }
+            el.style.opacity = 1;
+            setTimeout(() => { el.style.opacity = 0; }, 2000);
+        }, 300);
     }
 
     document.getElementById("bestValue").textContent = state.best;
@@ -311,10 +325,7 @@
     resizeCanvas();
 
     class Box {
-        constructor(id, x, y, size) { 
-            this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; 
-            this.lift=0; this.scale=1; this.z=0;
-        }
+        constructor(id, x, y, size) { this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; this.lift=0; this.scale=1; this.z=0; }
         draw() {
             ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
             ctx.scale(this.scale, this.scale);
@@ -357,15 +368,22 @@
         }
 
         state.swapsRemaining = 3 + Math.floor(state.score * 0.6);
-        if (state.score >= 12) state.swapsRemaining += 2; // HARDCORE CHAOS
+        if (state.score >= 12) state.swapsRemaining += 2; 
+        state.totalSwaps += state.swapsRemaining;
         
         setPhase("show");
+        document.getElementById("gameShell").classList.remove("pick-tension");
         const showTime = state.score >= 10 ? 800 : 1200;
         setTimeout(() => { if(state.running) setPhase("shuffle"); }, showTime);
     }
 
     function shuffle() {
-        if (state.swapsRemaining <= 0) { setPhase("pick"); return; }
+        if (state.swapsRemaining <= 0) { 
+            setPhase("pick"); 
+            state.pickStartTime = performance.now();
+            document.getElementById("gameShell").classList.add("pick-tension"); // MICRO TENSION
+            return; 
+        }
         let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
         while(a === b) b = Math.floor(Math.random() * boxes.length);
         
@@ -373,10 +391,9 @@
         if (state.score >= 10) { baseSpeed = 0.06; maxSpeed = 0.18; }
         let speed = Math.min(maxSpeed, baseSpeed + state.score * 0.003);
         
-        // DIFFICULTY PATTERN BREAKS
-        const isBurst = state.score >= 8 && Math.random() < 0.25; // 25% Chance auf massiven Speed-Spike
-        const isFreeze = state.score >= 12 && Math.random() < 0.15; // 15% Chance auf kurzes "Einfrieren" vor dem Tausch
-        const isMultiChaos = state.score >= 15 && Math.random() < 0.2; // Extremes Tempo
+        const isBurst = state.score >= 8 && Math.random() < 0.25; 
+        const isFreeze = state.score >= 12 && Math.random() < 0.15; 
+        const isMultiChaos = state.score >= 15 && Math.random() < 0.2; 
         
         if (isBurst) speed *= 1.8;
         if (isMultiChaos) speed *= 2.5;
@@ -385,14 +402,7 @@
         const direction = Math.random() > 0.5 ? 1 : -1;
         const arcHeight = direction * Math.min(distance * 0.35, 100);
 
-        state.activeSwap = { 
-            aIdx: a, bIdx: b, 
-            sax: boxes[a].x, say: boxes[a].y, 
-            sbx: boxes[b].x, sby: boxes[b].y, 
-            arcH: arcHeight, 
-            p: isFreeze ? -0.4 : 0, // Freeze Delay Hack
-            spd: speed 
-        };
+        state.activeSwap = { aIdx: a, bIdx: b, sax: boxes[a].x, say: boxes[a].y, sbx: boxes[b].x, sby: boxes[b].y, arcH: arcHeight, p: isFreeze ? -0.4 : 0, spd: speed };
         state.swapsRemaining--;
     }
 
@@ -403,9 +413,7 @@
             if (!state.activeSwap) shuffle();
             else {
                 state.activeSwap.p += state.activeSwap.spd; 
-                // Begrenze p nach unten für den Freeze-Effekt, aber rechne Animation erst ab p > 0
                 const visualP = Math.max(0, Math.min(1, state.activeSwap.p)); 
-                
                 const ease = visualP < 0.5 ? 4 * visualP * visualP * visualP : 1 - Math.pow(-2 * visualP + 2, 3) / 2;
                 const arc = Math.sin(visualP * Math.PI);
                 const scaleEffect = arc * 0.15;
@@ -431,14 +439,13 @@
             }
         }
         if (state.phase === "reveal") {
+            document.getElementById("gameShell").classList.remove("pick-tension");
             boxes.forEach(bx => { if (bx.id === state.correctBoxId || bx.id === state.selectedBoxId) bx.lift = Math.min(45, bx.lift + 5); });
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
-                    // COMBO MULTIPLIER (DOPAMIN BOOST)
                     const comboBonus = state.combo > 1 ? Math.floor((state.combo - 1) * 0.5) : 0;
                     state.score += 1 + comboBonus; 
-                    
-                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4)); // Skaliert sanfter wegen Combo-Boost
+                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4)); 
                     updateHUD(); buildRound();
                 } else {
                     endGame();
@@ -456,7 +463,6 @@
     }
     
     function updateHUD() { 
-        // COMBO VISUALS IM HUD
         const comboHtml = state.combo > 1 ? `<span style="color: #e67e22; font-size: 14px; margin-left: 6px; animation: pulseFire 0.5s infinite alternate;">🔥x${state.combo}</span>` : "";
         document.getElementById("scoreValue").innerHTML = `${state.score} ${comboHtml}`; 
         document.getElementById("bestValue").textContent = state.best;
@@ -468,51 +474,77 @@
         document.getElementById("finalScore").textContent = state.score;
         updateHUD();
 
-        // 1. IDENTITÄT: RANK SYSTEM
-        const rankDisplay = document.getElementById("rankDisplay");
-        if(rankDisplay) rankDisplay.textContent = `RANK: ${getRankName(state.score)}`;
+        // IDENTITY GENERATION
+        let avgReact = state.reactionTimes.length > 0 ? state.reactionTimes.reduce((a,b)=>a+b,0)/state.reactionTimes.length : 0;
+        let idClass = "DISTRACTED";
+        if (state.score >= 5) idClass = avgReact < 600 ? "RECKLESS TIER" : "AWARE CLASS";
+        if (state.score >= 12) idClass = avgReact < 500 ? "CLINICAL PRECISION" : "FOCUSED CLASS";
+        if (state.score >= 25) idClass = "DANGEROUS ELITE";
+        
+        document.getElementById("idClass").textContent = idClass;
+        document.getElementById("idReact").textContent = avgReact > 0 ? `${Math.floor(avgReact)}ms` : "N/A";
+        
+        const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
+        document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
 
-        // 2. SOCIAL PROOF: PERCENTILE
-        const percentileDisplay = document.getElementById("percentileDisplay");
-        const percentile = Math.min(99, Math.max(10, Math.floor(20 + state.score * 3.5)));
-        if(percentileDisplay) percentileDisplay.textContent = `Fokussierter als ${percentile}% der Spieler`;
-
-        // 3. RETENTION KILL SWITCH & EDDIE VOICE
+        // EDDIE PSYCHOLOGY (Game Over)
         if (state.score < 5) lowScoreStreak++; else lowScoreStreak = 0;
         localStorage.setItem('mg_lowScore', lowScoreStreak);
         
-        const eddieQuoteEl = document.getElementById("eddieQuote");
-        if(eddieQuoteEl) {
-            if (lowScoreStreak >= 3) {
-                eddieQuoteEl.textContent = "Du bist nicht fokussiert. Trainier das. Keine Ausreden mehr.";
-                eddieQuoteEl.style.color = "#c92a2a";
-            } else {
-                eddieQuoteEl.textContent = eddieQuotes[Math.floor(Math.random() * eddieQuotes.length)];
-                eddieQuoteEl.style.color = "#555";
-            }
+        const eddieEl = document.getElementById("eddieQuote");
+        if (lowScoreStreak >= 3) {
+            eddieEl.textContent = "Du spielst gegen dich selbst. Und verlierst.";
+            eddieEl.style.color = "var(--danger)";
+        } else if (state.combo > 3 && state.selectedBoxId !== state.correctBoxId) {
+            eddieEl.textContent = "Übermut bestraft. Ein Fehler reicht im echten Leben.";
+        } else {
+            eddieEl.textContent = "Fokus ist kein Talent. Es ist Entscheidung.";
+            eddieEl.style.color = "#555";
         }
 
-        // 4. FORCED VIRAL LOOP (SHARE-GATE)
-        const saveSection = document.getElementById("saveScoreSection");
-        const shareBtn = document.getElementById("shareBtn");
+        // HARD VIRAL LOCK
+        const viralContainer = document.getElementById("viralLockContainer");
+        const standardShare = document.getElementById("standardShare");
         
         if (state.score >= 7) {
-            saveSection.style.display = "none"; // VERSTECKT!
-            shareBtn.textContent = "EGO BEWEISEN UM ZU RANKEN (SHARE)";
-            shareBtn.dataset.gatesave = "true";
+            viralContainer.style.display = "block";
+            viralContainer.classList.remove("unlocked");
+            standardShare.style.display = "none";
+            document.getElementById("idStatus").textContent = "PENDING";
+            document.getElementById("idStatus").style.color = "var(--danger)";
         } else {
-            saveSection.style.display = "block"; // NORMAL OFFEN UNTER 7
-            shareBtn.textContent = "EGO BEWEISEN (SHARE)";
-            shareBtn.dataset.gatesave = "false";
+            viralContainer.style.display = "none";
+            standardShare.style.display = "block";
+            document.getElementById("idStatus").textContent = "RANK TOO LOW";
+            document.getElementById("idStatus").style.color = "#888";
+        }
+
+        // QUICK RETRY HOOK
+        const qr = document.getElementById("quickRetryText");
+        if (state.score > 0 && state.score % 5 === 4) { // Fast an einer Schwelle gescheitert (4, 9, 14)
+            qr.textContent = `Noch 1 Versuch für Level ${state.score + 1}?`;
+            qr.style.display = "block";
+        } else {
+            qr.style.display = "none";
         }
 
         document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
 
     function handleInput(e) {
-        initAudio(); // Initialize audio context on first user interaction
+        initAudio(); 
+        
+        // MISSCLICK PUNISHMENT
+        if (state.running && state.phase !== "pick" && state.phase !== "reveal") {
+            eddieLiveFeedback("missclick");
+            return;
+        }
+        
         if (state.phase !== "pick") return;
         
+        const reactTime = performance.now() - state.pickStartTime;
+        state.reactionTimes.push(reactTime);
+
         const rect = canvas.getBoundingClientRect();
         const clientX = e.clientX || (e.touches ? e.touches[e.touches.length-1].clientX : 0);
         const clientY = e.clientY || (e.touches ? e.touches[e.touches.length-1].clientY : 0);
@@ -525,41 +557,38 @@
                 state.selectedBoxId = bx.id; 
                 boxHit = true;
                 
-                // GAME FEEL: SUCCESS OR FAIL
                 if(bx.id === state.correctBoxId) {
-                    state.combo++; // COMBO AUFBAUEN
-                    fxCorrect();
-                    fxWinVisual(); // DOPAMIN SPIKE
+                    state.combo++; 
+                    fxCorrect(); fxWinVisual();
+                    if (reactTime < 400 && state.score > 3) eddieLiveFeedback("fast");
+                    else if (reactTime > 1500 && state.score > 3) eddieLiveFeedback("slow");
                     if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
                 } else {
-                    state.combo = 0; // COMBO RESET
+                    state.combo = 0; 
                     fxWrong();
                     if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
-                    // SCREEN SHAKE
                     document.body.classList.add("shake-effect");
                     setTimeout(() => document.body.classList.remove("shake-effect"), 400);
                 }
                 setPhase("reveal"); 
             } 
         });
-        if(!boxHit && state.phase === "pick") fxClick(); // Nur klicken ins Leere
+        if(!boxHit) fxClick(); 
     }
 
-    // EVENT LISTENERS
-    document.getElementById("startBtn").addEventListener("click", () => { 
+    function startGame() {
         initAudio(); fxClick();
         document.getElementById("startOverlay").classList.add("hidden"); 
-        state.running = true; state.score = 0; state.combo = 0; state.boxCount = 2; state.hardModeTriggered = false;
-        updateHUD(); buildRound(); 
-    });
-    
-    document.getElementById("restartBtn").addEventListener("click", () => {
-        fxClick();
         document.getElementById("gameOverOverlay").classList.add("hidden");
         state.running = true; state.score = 0; state.combo = 0; state.boxCount = 2; state.hardModeTriggered = false;
+        state.reactionTimes = []; state.totalSwaps = 0;
         updateHUD(); buildRound(); 
         if (currentUser) loadLeaderboard();
-    });
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startGame);
+    document.getElementById("restartBtn").addEventListener("click", startGame);
+    document.getElementById("quickRetryText").addEventListener("click", startGame);
 
     document.getElementById("saveBtn").addEventListener("click", async () => {
         fxClick();
@@ -571,74 +600,52 @@
         const success = await saveScoreToDB(name, state.score);
         
         if (success) {
-            // EGO TRIGGER: STATUS FEEDBACK
-            const rank = globalLeaderboard.findIndex(e => e.uid === currentUser.uid) + 1;
-            const rankDisplay = rank > 0 ? `PLATZ #${rank} GESICHERT` : "GESPEICHERT!";
-            btn.textContent = rankDisplay;
-            
-            setTimeout(() => {
-                document.getElementById("saveScoreSection").style.display = "none";
-                nameInput.value = ""; 
-                btn.textContent = "INS RANKING AUFNEHMEN"; btn.disabled = false;
-            }, 2500);
+            btn.textContent = "SPOT GESICHERT!";
+            document.getElementById("idStatus").textContent = "VERIFIED";
+            document.getElementById("idStatus").style.color = "var(--mg-gold)";
+            setTimeout(() => { document.getElementById("saveScoreSection").style.display = "none"; }, 1500);
         } else {
             btn.textContent = "FEHLER. NOCHMAL."; btn.disabled = false;
         }
     });
 
-    document.getElementById("shareBtn").addEventListener("click", () => {
-        fxClick();
-        
-        const rankName = getRankName(state.score);
-        const shareText = `Ich habe Score ${state.score} erreicht (RANK: ${rankName}). Fokus ist Luxus. Die meisten scheitern. Hast du ihn?`;
-        const url = window.location.href;
-        const fullText = `${shareText} ${url}`;
-        
-        // UNLOCK FUNKTION FÜR DAS SHARE-GATE
-        const unlockSaveGate = () => {
-            const btn = document.getElementById("shareBtn");
-            if (btn.dataset.gatesave === "true") {
-                document.getElementById("saveScoreSection").style.display = "block";
-                btn.textContent = "RANKING FREIGESCHALTET";
-                btn.classList.add("btn-gold");
-            } else {
-                btn.textContent = "LINK KOPIERT!";
-                setTimeout(() => {
-                    if (btn.dataset.gatesave !== "true") {
-                        btn.textContent = "EGO BEWEISEN (SHARE)";
-                    }
-                }, 2000);
-            }
-        };
-
-        if (navigator.share) { 
-            navigator.share({ title: 'MG Challenge', text: shareText, url: url })
-            .then(unlockSaveGate)
-            .catch((err) => {
-                console.error("Share cancelled or failed:", err);
-                // Schaltet das Ranking trotzdem frei, falls der User auf "Abbrechen" klickt
-                unlockSaveGate(); 
-            }); 
-        } 
-        else {
-            // BULLETPROOF FALLBACK FÜR DESKTOP / ZWISCHENABLAGE
-            const textArea = document.createElement("textarea");
-            textArea.value = fullText;
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-            } catch (err) {
-                console.error('Fallback copy failed', err);
-            }
-            document.body.removeChild(textArea);
-            unlockSaveGate();
+    const triggerViralUnlock = () => {
+        const container = document.getElementById("viralLockContainer");
+        if (container.style.display !== "none") {
+            container.classList.add("unlocked");
+            document.getElementById("idStatus").textContent = "UNLOCKED";
+            document.getElementById("idStatus").style.color = "#000";
         }
-    });
+    };
+
+    const handleShare = () => {
+        fxClick();
+        const idClass = document.getElementById("idClass").textContent;
+        const shareText = `Ich habe Score ${state.score} erreicht (Class: ${idClass}). Fokus ist Luxus. Die meisten scheitern. Hast du ihn?`;
+        const url = window.location.href;
+        
+        if (navigator.share) { 
+            navigator.share({ title: 'Focus System', text: shareText, url: url })
+            .then(triggerViralUnlock).catch(() => triggerViralUnlock()); 
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = `${shareText} ${url}`;
+            textArea.style.position = "fixed"; document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); } catch (err) {}
+            document.body.removeChild(textArea);
+            triggerViralUnlock();
+            
+            const standardBtn = document.getElementById("shareBtnStandard");
+            if(standardBtn.style.display !== "none") {
+                standardBtn.textContent = "LINK KOPIERT!";
+                setTimeout(() => standardBtn.textContent = "EGO BEWEISEN (SHARE)", 2000);
+            }
+        }
+    };
+
+    document.getElementById("shareBtnUnlock").addEventListener("click", handleShare);
+    document.getElementById("shareBtnStandard").addEventListener("click", handleShare);
 
     canvas.addEventListener("mousedown", handleInput);
     canvas.addEventListener("touchend", (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
