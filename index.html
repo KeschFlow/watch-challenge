@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -18,7 +17,7 @@
         
         body { background: var(--mg-light); color: var(--mg-dark); height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HUD - MG Shop Style */
+        /* HUD */
         .hud { 
             position: absolute; top: 0; left: 0; right: 0;
             z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); 
@@ -31,20 +30,25 @@
         .stat .label { font-size: 9px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
         .stat .value { font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; }
         
-        /* EDDIE LIVE FEEDBACK */
         .eddie-live {
             position: absolute; top: 75px; left: 0; right: 0; text-align: center;
             font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
-            color: #888; z-index: 15; height: 15px; transition: color 0.3s, opacity 0.3s;
+            color: #888; z-index: 15; height: 15px; transition: opacity 0.3s; pointer-events: none;
         }
 
         .streak-fire { color: #e67e22; font-size: 16px; animation: pulseFire 1.5s infinite alternate; }
 
         /* Spielfeld */
         .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 60px; transition: transform 0.3s cubic-bezier(.17,.67,.83,.67); }
-        .game-shell.pick-tension { transform: scale(1.03); } /* MICRO-TENSION ZOOM */
+        .game-shell.pick-tension { transform: scale(1.03); } 
         
-        canvas { max-width: 95vw; max-height: 75vh; cursor: pointer; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); }
+        canvas { 
+            max-width: 95vw; 
+            max-height: 75vh; 
+            cursor: pointer; 
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); 
+            touch-action: none; /* VERHINDERT SCROLLEN AUF DEM CANVAS */
+        }
 
         /* Overlays */
         .overlay { position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
@@ -55,49 +59,30 @@
         h1 { font-size: 24px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; color: var(--mg-dark); font-weight: 900; }
         .subtitle { font-size: 10px; color: #888; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; position: relative; overflow: hidden; }
+        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; }
         .btn:hover { background: var(--mg-gold); }
         .btn-gold { background: var(--mg-gold); color: #000; }
         .btn-outline { background: #fff; color: var(--mg-dark); border: 2px solid var(--mg-dark); padding: 12px; font-size: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* Identity Tags */
         .identity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid var(--mg-gold); }
         .id-stat { text-align: left; }
         .id-stat span { display: block; font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
         .id-stat strong { display: block; font-size: 14px; color: var(--mg-dark); font-weight: 900; }
 
-        /* HARD VIRAL LOCK SYSTEM */
         .lock-container { position: relative; margin-bottom: 20px; }
         .locked-content { filter: blur(6px); pointer-events: none; user-select: none; opacity: 0.6; transition: 0.5s; }
         .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        .lock-icon { font-size: 24px; margin-bottom: 10px; }
         .unlocked .locked-content { filter: blur(0); pointer-events: auto; opacity: 1; }
         .unlocked .lock-overlay { display: none; }
 
-        /* Leaderboard UI */
         .lb-container { margin: 25px 0; border: 1px solid #ddd; padding: 15px; background: #fafafa; border-radius: 4px; }
         .lb-title { font-size: 13px; font-weight: 900; letter-spacing: 2px; border-bottom: 2px solid var(--mg-dark); padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase; color: var(--mg-dark); }
         .lb-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
         .lb-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .lb-row:last-child { border-bottom: none; }
-        .lb-rank { font-weight: bold; color: #888; width: 35px; text-align: left; }
-        .lb-name { font-weight: bold; color: var(--mg-dark); flex-grow: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .lb-score { font-weight: 900; color: var(--mg-gold); margin-left: 10px; }
-        .lb-loading { font-size: 12px; color: #888; font-style: italic; }
-
-        #nameInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; background: #fff; color: #000; outline: none; border-radius: 2px; }
-        #nameInput:focus { border-color: var(--mg-gold); }
         
-        /* Game Feel Animations */
         @keyframes pulseFire { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.2); opacity: 1; } }
-        @keyframes flashBg { 0% { background-color: var(--mg-gold); } 100% { background-color: var(--mg-light); } }
-        .hard-mode-flash { animation: flashBg 0.4s ease-out; }
-        
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
         .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        
-        /* Quick Retry prompt */
-        .quick-retry { font-size: 10px; color: var(--danger); font-weight: 900; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; animation: pulseFire 1s infinite alternate; cursor: pointer; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
     </style>
 </head>
 <body>
@@ -116,14 +101,10 @@
             <div class="card">
                 <h1>FOCUS SYSTEM</h1>
                 <p class="subtitle">MARC GEBAUER x EDDIE'S WORLD</p>
-                
                 <button class="btn" id="startBtn">SYSTEM STARTEN</button>
-                
                 <div class="lb-container">
                     <div class="lb-title">ELITE RANKING</div>
-                    <ul class="lb-list" id="startLeaderboard">
-                        <li class="lb-loading">Lade Ranking...</li>
-                    </ul>
+                    <ul class="lb-list" id="startLeaderboard"><li class="lb-loading">Lade Ranking...</li></ul>
                 </div>
             </div>
         </div>
@@ -132,10 +113,8 @@
             <div class="card">
                 <h1 style="color:var(--danger); margin-bottom:5px;">SYSTEM FAILED</h1>
                 <p id="eddieQuote" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;"></p>
-                
                 <div id="finalScore" style="font-size:70px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
                 
-                <!-- IDENTITY LAYER -->
                 <div class="identity-grid">
                     <div class="id-stat"><span>Class</span><strong id="idClass">DISTRACTED</strong></div>
                     <div class="id-stat"><span>Avg React</span><strong id="idReact">0ms</strong></div>
@@ -143,14 +122,12 @@
                     <div class="id-stat"><span>Status</span><strong id="idStatus" style="color:var(--mg-gold)">UNVERIFIED</strong></div>
                 </div>
                 
-                <!-- HARD VIRAL LOCK SYSTEM -->
                 <div id="viralLockContainer" class="lock-container">
-                    <div class="lock-overlay" id="lockOverlay">
-                        <div class="lock-icon">🔒</div>
+                    <div class="lock-overlay">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🔒</div>
                         <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px; color: #000; text-transform: uppercase;">Ranking Locked.</p>
                         <button class="btn btn-gold" id="shareBtnUnlock" style="margin-bottom:0;">EGO BEWEISEN (SHARE)</button>
                     </div>
-                    
                     <div class="locked-content" id="saveScoreSection">
                         <p style="font-size: 12px; font-weight: 900; margin-bottom: 10px; color: var(--mg-dark); text-transform: uppercase;">SPOT SICHERN:</p>
                         <input type="text" id="nameInput" placeholder="INSTAGRAM ODER WHATSAPP" maxlength="30" autocomplete="off">
@@ -163,14 +140,12 @@
                 </div>
 
                 <button class="btn" id="restartBtn">SYSTEM REBOOT</button>
-                <div class="quick-retry" id="quickRetryText" style="display:none;"></div>
                 <a href="https://marcgebauer.com" target="_blank" style="color:#aaa; font-weight:bold; text-decoration:none; display:block; margin-top:20px; font-size:10px; text-transform:uppercase;">MARCGEBAUER.COM</a>
             </div>
         </div>
     </main>
 
 <script type="module">
-    // --- FIREBASE SETUP ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -189,155 +164,63 @@
     const db = getFirestore(app);
     
     let currentUser = null;
-    let globalLeaderboard = [];
     let unsubscribeLB = null;
 
-    const initAuth = async () => { try { await signInAnonymously(auth); } catch (e) { console.error("Auth Error", e); } };
-    initAuth();
-
-    onAuthStateChanged(auth, (user) => { currentUser = user; if (user) loadLeaderboard(); });
+    onAuthStateChanged(auth, (user) => { currentUser = user; if (user) loadLeaderboard(); else signInAnonymously(auth); });
 
     function loadLeaderboard() {
-        if (!currentUser) return;
         if (unsubscribeLB) unsubscribeLB(); 
-        const lbRef = collection(db, 'leaderboard');
-        unsubscribeLB = onSnapshot(lbRef, (snapshot) => {
+        unsubscribeLB = onSnapshot(collection(db, 'leaderboard'), (snapshot) => {
             let temp = [];
-            snapshot.forEach(doc => temp.push({ id: doc.id, ...doc.data() }));
+            snapshot.forEach(doc => temp.push(doc.data()));
             temp.sort((a, b) => b.score - a.score);
-            globalLeaderboard = temp.slice(0, 10);
-            renderLeaderboard();
-        });
-    }
-
-    function renderLeaderboard() {
-        const listEl = document.getElementById("startLeaderboard");
-        if (globalLeaderboard.length === 0) { listEl.innerHTML = '<li class="lb-loading">Noch keine Einträge.</li>'; return; }
-        
-        let html = "";
-        globalLeaderboard.forEach((entry, index) => {
-            let rankDisplay = `#${index + 1}`;
-            if (index === 0) rankDisplay = "🥇"; if (index === 1) rankDisplay = "🥈"; if (index === 2) rankDisplay = "🥉";
-            html += `
+            const listEl = document.getElementById("startLeaderboard");
+            listEl.innerHTML = temp.slice(0, 10).map((e, i) => `
                 <li class="lb-row">
-                    <span class="lb-rank">${rankDisplay}</span>
-                    <span class="lb-name">${escapeHTML(entry.name)}</span>
-                    <span class="lb-score">${entry.score}</span>
-                </li>`;
+                    <span class="lb-rank">${i<3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1)}</span>
+                    <span class="lb-name">${e.name}</span>
+                    <span class="lb-score">${e.score}</span>
+                </li>`).join('') || '<li class="lb-loading">Noch keine Einträge.</li>';
         });
-        listEl.innerHTML = html;
     }
 
-    async function saveScoreToDB(playerName, finalScore) {
-        if (!currentUser || finalScore < 1) return false; 
-        if (playerName.length < 2) {
-            const btn = document.getElementById("saveBtn"); btn.textContent = "INVALID DATA";
-            setTimeout(() => { btn.textContent = "INS RANKING AUFNEHMEN"; btn.disabled = false; }, 2000);
-            return false;
-        }
-        const existing = globalLeaderboard.find(e => e.uid === currentUser.uid);
-        if (existing && existing.score >= finalScore) return true;
-
-        const userDocRef = doc(db, 'leaderboard', currentUser.uid);
-        try {
-            await setDoc(userDocRef, { name: playerName, score: finalScore, uid: currentUser.uid, timestamp: Date.now(), class: document.getElementById("idClass").textContent }, { merge: true }); 
-            return true;
-        } catch (e) { return false; }
-    }
-
-    function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])); }
-
-
-    // --- BEHAVIOR ENGINE V2 ---
+    // --- GAME LOGIC ---
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx;
-    function initAudio() { if(!audioCtx) audioCtx = new AudioContext(); }
     
-    function playTone(freq, type, duration, vol=0.1) {
+    function playTone(f, t, d, v=0.1) {
         if(!audioCtx || audioCtx.state === 'suspended') return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
-    
-    function fxClick() { playTone(400, 'square', 0.05, 0.03); }
-    function fxCorrect() { playTone(880, 'sine', 0.1, 0.1); setTimeout(() => playTone(1760, 'sine', 0.15, 0.15), 100); }
-    function fxWrong() { playTone(150, 'sawtooth', 0.4, 0.3); setTimeout(() => playTone(100, 'sawtooth', 0.5, 0.3), 100); }
-
-    function fxWinVisual() {
-        const shell = document.getElementById("gameShell");
-        shell.style.backgroundColor = "var(--mg-gold)";
-        setTimeout(() => { shell.style.backgroundColor = "transparent"; }, 120);
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    let currentStreak = parseInt(localStorage.getItem('mg_streak')) || 0;
-    let lastPlayed = localStorage.getItem('mg_lastPlayed');
-    let today = new Date().toDateString();
-    
-    if (lastPlayed !== today) {
-        let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (lastPlayed === yesterday.toDateString()) { currentStreak++; } 
-        else { currentStreak = 1; } 
-        localStorage.setItem('mg_streak', currentStreak);
-        localStorage.setItem('mg_lastPlayed', today);
-    }
-    document.getElementById("streakCount").textContent = currentStreak;
-
-    let boxes = [];
     let state = { 
-        running: false, score: 0, boxCount: 2, combo: 0,
-        best: localStorage.getItem("mg_net_best") || 0, 
-        phase: "idle", phaseStartedAt: 0, pickStartTime: 0,
-        correctBoxId: null, selectedBoxId: null, 
-        swapsRemaining: 0, activeSwap: null, hardModeTriggered: false,
-        reactionTimes: [], totalSwaps: 0
+        running: false, score: 0, boxCount: 2, combo: 0, inputLocked: true,
+        phase: "idle", phaseStartedAt: 0, pickStartTime: 0, reactionTimes: [],
+        correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null
     };
 
-    let lowScoreStreak = parseInt(localStorage.getItem('mg_lowScore')) || 0;
-
-    // ADAPTIVE EDDIE SYSTEM VOICE
-    function eddieLiveFeedback(type, reactTime = 0) {
-        const el = document.getElementById("eddieLiveQuote");
-        el.style.opacity = 0;
-        setTimeout(() => {
-            if (type === "slow") { el.textContent = "Zu langsam. Das war geraten."; el.style.color = "var(--danger)"; }
-            if (type === "fast") { el.textContent = "Guter Instinkt. Aber hältst du das?"; el.style.color = "var(--mg-gold)"; }
-            if (type === "missclick") { el.textContent = "Geduld. Eddie wartet auf den richtigen Moment."; el.style.color = "var(--danger)"; }
-            el.style.opacity = 1;
-            setTimeout(() => { el.style.opacity = 0; }, 2000);
-        }, 300);
+    function setPhase(p) {
+        state.phase = p;
+        state.phaseStartedAt = performance.now();
+        if (p === "pick") state.inputLocked = false;
+        else state.inputLocked = true;
     }
-
-    document.getElementById("bestValue").textContent = state.best;
-
-    function resizeCanvas() {
-        const size = Math.min(window.innerWidth * 0.95, 800);
-        canvas.width = size; canvas.height = size;
-        if(state.running && state.phase === "pick") buildRound();
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
 
     class Box {
-        constructor(id, x, y, size) { this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; this.lift=0; this.scale=1; this.z=0; }
+        constructor(id, x, y, s) { this.id=id; this.x=x; this.y=y; this.w=s; this.h=s; this.lift=0; this.scale=1; this.z=0; }
         draw() {
-            ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
-            ctx.scale(this.scale, this.scale);
-            if (this.scale > 1) { ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 15; ctx.shadowOffsetY = 10; }
-            
+            ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift); ctx.scale(this.scale, this.scale);
+            if (this.scale > 1) { ctx.shadowBlur = 15; ctx.shadowColor = "rgba(0,0,0,0.5)"; }
             ctx.fillStyle = "#222222"; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
-
+            ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
             if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
-                ctx.fillStyle="#c5a059"; 
-                const s = this.w*0.2; ctx.beginPath();
+                ctx.fillStyle="#c5a059"; const s = this.w*0.2; ctx.beginPath();
                 ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
                 ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.6, 0);
                 ctx.lineTo(-s, -s*0.5); ctx.closePath(); ctx.fill();
@@ -346,315 +229,134 @@
         }
     }
 
+    let boxes = [];
     function buildRound() {
-        boxes = []; 
-        const area = canvas.width * 0.8;
-        const maxR = Math.floor(canvas.width / 120); 
-        const cols = Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount)));
-        const rows = Math.ceil(state.boxCount / cols);
+        boxes = []; const area = canvas.width * 0.8; const maxR = Math.floor(canvas.width / 120); 
+        const cols = Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))); const rows = Math.ceil(state.boxCount / cols);
         const s = (area / maxR) - 10; const sp = 15;
         const tw = cols * s + (cols - 1) * sp; const th = rows * s + (rows - 1) * sp;
         const sx = (canvas.width - tw) / 2; const sy = (canvas.height - th) / 2;
-
         for (let i = 0; i < state.boxCount; i++) {
             const r = Math.floor(i / cols), c = i % cols;
             boxes.push(new Box(i, sx + c * (s + sp), sy + r * (s + sp), s));
         }
         state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        
-        if (state.score === 10 && !state.hardModeTriggered) {
-            state.hardModeTriggered = true;
-            document.body.classList.add("hard-mode-flash");
-            setTimeout(() => document.body.classList.remove("hard-mode-flash"), 400);
-        }
-
         state.swapsRemaining = 3 + Math.floor(state.score * 0.6);
-        if (state.score >= 12) state.swapsRemaining += 2; 
-        state.totalSwaps += state.swapsRemaining;
-        
         setPhase("show");
         document.getElementById("gameShell").classList.remove("pick-tension");
-        const showTime = state.score >= 10 ? 800 : 1200;
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, showTime);
+        setTimeout(() => { if(state.running) setPhase("shuffle"); }, state.score > 10 ? 800 : 1200);
     }
 
     function shuffle() {
         if (state.swapsRemaining <= 0) { 
             setPhase("pick"); 
             state.pickStartTime = performance.now();
-            document.getElementById("gameShell").classList.add("pick-tension"); // MICRO TENSION
+            document.getElementById("gameShell").classList.add("pick-tension");
             return; 
         }
         let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
         while(a === b) b = Math.floor(Math.random() * boxes.length);
-        
-        let baseSpeed = 0.04; let maxSpeed = 0.12; 
-        if (state.score >= 10) { baseSpeed = 0.06; maxSpeed = 0.18; }
-        let speed = Math.min(maxSpeed, baseSpeed + state.score * 0.003);
-        
-        const isBurst = state.score >= 8 && Math.random() < 0.25; 
-        const isFreeze = state.score >= 12 && Math.random() < 0.15; 
-        const isMultiChaos = state.score >= 15 && Math.random() < 0.2; 
-        
-        if (isBurst) speed *= 1.8;
-        if (isMultiChaos) speed *= 2.5;
-        
+        let speed = Math.min(0.18, 0.04 + state.score * 0.003);
         const distance = Math.abs(boxes[a].x - boxes[b].x) + Math.abs(boxes[a].y - boxes[b].y);
-        const direction = Math.random() > 0.5 ? 1 : -1;
-        const arcHeight = direction * Math.min(distance * 0.35, 100);
-
-        state.activeSwap = { aIdx: a, bIdx: b, sax: boxes[a].x, say: boxes[a].y, sbx: boxes[b].x, sby: boxes[b].y, arcH: arcHeight, p: isFreeze ? -0.4 : 0, spd: speed };
+        state.activeSwap = { aIdx: a, bIdx: b, sax: boxes[a].x, say: boxes[a].y, sbx: boxes[b].x, sby: boxes[b].y, arcH: (Math.random() > 0.5 ? 1 : -1) * Math.min(distance * 0.35, 100), p: 0, spd: speed };
         state.swapsRemaining--;
     }
-
-    function setPhase(p) { state.phase = p; state.phaseStartedAt = performance.now(); }
 
     function update() {
         if (state.phase === "shuffle") {
             if (!state.activeSwap) shuffle();
             else {
-                state.activeSwap.p += state.activeSwap.spd; 
-                const visualP = Math.max(0, Math.min(1, state.activeSwap.p)); 
-                const ease = visualP < 0.5 ? 4 * visualP * visualP * visualP : 1 - Math.pow(-2 * visualP + 2, 3) / 2;
-                const arc = Math.sin(visualP * Math.PI);
-                const scaleEffect = arc * 0.15;
+                state.activeSwap.p += state.activeSwap.spd; const p = Math.min(1, state.activeSwap.p);
+                const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+                const arc = Math.sin(p * Math.PI);
                 const sign = Math.sign(state.activeSwap.arcH) || 1;
-
                 boxes[state.activeSwap.aIdx].x = state.activeSwap.sax + (state.activeSwap.sbx - state.activeSwap.sax) * ease;
                 boxes[state.activeSwap.aIdx].y = state.activeSwap.say + (state.activeSwap.sby - state.activeSwap.say) * ease - (state.activeSwap.arcH * arc);
-                boxes[state.activeSwap.aIdx].scale = 1 - (sign * scaleEffect);
-                boxes[state.activeSwap.aIdx].z = boxes[state.activeSwap.aIdx].scale;
-
+                boxes[state.activeSwap.aIdx].scale = 1 - (sign * arc * 0.15);
                 boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx + (state.activeSwap.sax - state.activeSwap.sbx) * ease;
                 boxes[state.activeSwap.bIdx].y = state.activeSwap.sby + (state.activeSwap.say - state.activeSwap.sby) * ease + (state.activeSwap.arcH * arc);
-                boxes[state.activeSwap.bIdx].scale = 1 + (sign * scaleEffect);
-                boxes[state.activeSwap.bIdx].z = boxes[state.activeSwap.bIdx].scale;
-                
-                if (state.activeSwap.p >= 1) {
-                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sbx; boxes[state.activeSwap.aIdx].y = state.activeSwap.sby;
-                    boxes[state.activeSwap.aIdx].scale = 1; boxes[state.activeSwap.aIdx].z = 0;
-                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sax; boxes[state.activeSwap.bIdx].y = state.activeSwap.say;
-                    boxes[state.activeSwap.bIdx].scale = 1; boxes[state.activeSwap.bIdx].z = 0;
+                boxes[state.activeSwap.bIdx].scale = 1 + (sign * arc * 0.15);
+                if (p >= 1) {
+                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sbx; boxes[state.activeSwap.aIdx].y = state.activeSwap.sby; boxes[state.activeSwap.aIdx].scale = 1;
+                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sax; boxes[state.activeSwap.bIdx].y = state.activeSwap.say; boxes[state.activeSwap.bIdx].scale = 1;
                     state.activeSwap = null;
                 }
             }
         }
         if (state.phase === "reveal") {
-            document.getElementById("gameShell").classList.remove("pick-tension");
             boxes.forEach(bx => { if (bx.id === state.correctBoxId || bx.id === state.selectedBoxId) bx.lift = Math.min(45, bx.lift + 5); });
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
-                    const comboBonus = state.combo > 1 ? Math.floor((state.combo - 1) * 0.5) : 0;
-                    state.score += 1 + comboBonus; 
-                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4)); 
-                    updateHUD(); buildRound();
-                } else {
-                    endGame();
-                }
+                    state.score += 1 + (state.combo > 1 ? Math.floor(state.combo * 0.5) : 0);
+                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4));
+                    document.getElementById("scoreValue").textContent = state.score;
+                    buildRound();
+                } else endGame();
             }
         }
     }
 
     function loop() { 
-        if (state.running || state.phase === "reveal") update(); 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        const sortedBoxes = [...boxes].sort((a, b) => a.z - b.z);
-        sortedBoxes.forEach(bx => bx.draw()); 
+        if (state.running || state.phase === "reveal") update(); ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        boxes.sort((a, b) => a.scale - b.scale).forEach(bx => bx.draw()); 
         requestAnimationFrame(loop); 
     }
-    
-    function updateHUD() { 
-        const comboHtml = state.combo > 1 ? `<span style="color: #e67e22; font-size: 14px; margin-left: 6px; animation: pulseFire 0.5s infinite alternate;">🔥x${state.combo}</span>` : "";
-        document.getElementById("scoreValue").innerHTML = `${state.score} ${comboHtml}`; 
-        document.getElementById("bestValue").textContent = state.best;
-    }
 
-    function endGame() {
-        state.running = false;
-        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_net_best", state.best); }
-        document.getElementById("finalScore").textContent = state.score;
-        updateHUD();
-
-        // IDENTITY GENERATION
-        let avgReact = state.reactionTimes.length > 0 ? state.reactionTimes.reduce((a,b)=>a+b,0)/state.reactionTimes.length : 0;
-        let idClass = "DISTRACTED";
-        if (state.score >= 5) idClass = avgReact < 600 ? "RECKLESS TIER" : "AWARE CLASS";
-        if (state.score >= 12) idClass = avgReact < 500 ? "CLINICAL PRECISION" : "FOCUSED CLASS";
-        if (state.score >= 25) idClass = "DANGEROUS ELITE";
-        
-        document.getElementById("idClass").textContent = idClass;
-        document.getElementById("idReact").textContent = avgReact > 0 ? `${Math.floor(avgReact)}ms` : "N/A";
-        
-        const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
-        document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
-
-        // EDDIE PSYCHOLOGY (Game Over)
-        if (state.score < 5) lowScoreStreak++; else lowScoreStreak = 0;
-        localStorage.setItem('mg_lowScore', lowScoreStreak);
-        
-        const eddieEl = document.getElementById("eddieQuote");
-        if (lowScoreStreak >= 3) {
-            eddieEl.textContent = "Du spielst gegen dich selbst. Und verlierst.";
-            eddieEl.style.color = "var(--danger)";
-        } else if (state.combo > 3 && state.selectedBoxId !== state.correctBoxId) {
-            eddieEl.textContent = "Übermut bestraft. Ein Fehler reicht im echten Leben.";
-        } else {
-            eddieEl.textContent = "Fokus ist kein Talent. Es ist Entscheidung.";
-            eddieEl.style.color = "#555";
-        }
-
-        // HARD VIRAL LOCK
-        const viralContainer = document.getElementById("viralLockContainer");
-        const standardShare = document.getElementById("standardShare");
-        
-        if (state.score >= 7) {
-            viralContainer.style.display = "block";
-            viralContainer.classList.remove("unlocked");
-            standardShare.style.display = "none";
-            document.getElementById("idStatus").textContent = "PENDING";
-            document.getElementById("idStatus").style.color = "var(--danger)";
-        } else {
-            viralContainer.style.display = "none";
-            standardShare.style.display = "block";
-            document.getElementById("idStatus").textContent = "RANK TOO LOW";
-            document.getElementById("idStatus").style.color = "#888";
-        }
-
-        // QUICK RETRY HOOK
-        const qr = document.getElementById("quickRetryText");
-        if (state.score > 0 && state.score % 5 === 4) { // Fast an einer Schwelle gescheitert (4, 9, 14)
-            qr.textContent = `Noch 1 Versuch für Level ${state.score + 1}?`;
-            qr.style.display = "block";
-        } else {
-            qr.style.display = "none";
-        }
-
-        document.getElementById("gameOverOverlay").classList.remove("hidden");
-    }
-
+    // --- UNIFIED UNIFIED INPUT SYSTEM ---
     function handleInput(e) {
-        initAudio(); 
+        if(!audioCtx) audioCtx = new AudioContext();
+        if (!state.running || state.phase !== "pick" || state.inputLocked) return;
         
-        // MISSCLICK PUNISHMENT
-        if (state.running && state.phase !== "pick" && state.phase !== "reveal") {
-            eddieLiveFeedback("missclick");
-            return;
-        }
-        
-        if (state.phase !== "pick") return;
-        
-        const reactTime = performance.now() - state.pickStartTime;
-        state.reactionTimes.push(reactTime);
-
+        state.inputLocked = true; // LOCK IMMEDIATELY
         const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX || (e.touches ? e.touches[e.touches.length-1].clientX : 0);
-        const clientY = e.clientY || (e.touches ? e.touches[e.touches.length-1].clientY : 0);
-        const cx = (clientX - rect.left) * (canvas.width / rect.width);
-        const cy = (clientY - rect.top) * (canvas.height / rect.height);
+        const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
         
         let boxHit = false;
         boxes.forEach(bx => { 
             if (cx > bx.x && cx < bx.x + bx.w && cy > bx.y && cy < bx.y + bx.h) { 
-                state.selectedBoxId = bx.id; 
-                boxHit = true;
-                
-                if(bx.id === state.correctBoxId) {
-                    state.combo++; 
-                    fxCorrect(); fxWinVisual();
-                    if (reactTime < 400 && state.score > 3) eddieLiveFeedback("fast");
-                    else if (reactTime > 1500 && state.score > 3) eddieLiveFeedback("slow");
-                    if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
-                } else {
-                    state.combo = 0; 
-                    fxWrong();
-                    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
-                    document.body.classList.add("shake-effect");
-                    setTimeout(() => document.body.classList.remove("shake-effect"), 400);
-                }
+                state.selectedBoxId = bx.id; boxHit = true;
+                if(bx.id === state.correctBoxId) { state.combo++; playTone(880, 'sine', 0.1); } 
+                else { state.combo = 0; playTone(150, 'sawtooth', 0.4); document.body.classList.add("shake-effect"); setTimeout(() => document.body.classList.remove("shake-effect"), 400); }
                 setPhase("reveal"); 
             } 
         });
-        if(!boxHit) fxClick(); 
+        if(!boxHit) { state.inputLocked = false; playTone(400, 'square', 0.05); }
     }
 
-    function startGame() {
-        initAudio(); fxClick();
-        document.getElementById("startOverlay").classList.add("hidden"); 
-        document.getElementById("gameOverOverlay").classList.add("hidden");
-        state.running = true; state.score = 0; state.combo = 0; state.boxCount = 2; state.hardModeTriggered = false;
-        state.reactionTimes = []; state.totalSwaps = 0;
-        updateHUD(); buildRound(); 
-        if (currentUser) loadLeaderboard();
-    }
-
-    document.getElementById("startBtn").addEventListener("click", startGame);
-    document.getElementById("restartBtn").addEventListener("click", startGame);
-    document.getElementById("quickRetryText").addEventListener("click", startGame);
-
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-        fxClick();
-        const nameInput = document.getElementById("nameInput");
-        const name = nameInput.value.trim() || "Gast";
-        const btn = document.getElementById("saveBtn");
+    function endGame() {
+        state.running = false;
+        document.getElementById("finalScore").textContent = state.score;
+        const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
+        document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
         
-        btn.textContent = "SPEICHERT..."; btn.disabled = true;
-        const success = await saveScoreToDB(name, state.score);
-        
-        if (success) {
-            btn.textContent = "SPOT GESICHERT!";
-            document.getElementById("idStatus").textContent = "VERIFIED";
-            document.getElementById("idStatus").style.color = "var(--mg-gold)";
-            setTimeout(() => { document.getElementById("saveScoreSection").style.display = "none"; }, 1500);
+        const viral = document.getElementById("viralLockContainer");
+        if (state.score >= 7) {
+            viral.style.display = "block"; viral.classList.remove("unlocked");
+            document.getElementById("standardShare").style.display = "none";
         } else {
-            btn.textContent = "FEHLER. NOCHMAL."; btn.disabled = false;
+            viral.style.display = "none"; document.getElementById("standardShare").style.display = "block";
         }
+        document.getElementById("gameOverOverlay").classList.remove("hidden");
+    }
+
+    canvas.addEventListener("pointerdown", handleInput);
+    document.getElementById("startBtn").addEventListener("click", () => { document.getElementById("startOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; buildRound(); });
+    document.getElementById("restartBtn").addEventListener("click", () => { document.getElementById("gameOverOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; buildRound(); });
+    
+    document.getElementById("shareBtnUnlock").addEventListener("click", () => {
+        const text = `Mein Fokus Score: ${state.score}. Schaffst du mehr? ${window.location.href}`;
+        if (navigator.share) navigator.share({ title: 'Focus System', text: text }).then(() => document.getElementById("viralLockContainer").classList.add("unlocked"));
+        else { navigator.clipboard.writeText(text); document.getElementById("viralLockContainer").classList.add("unlocked"); }
     });
 
-    const triggerViralUnlock = () => {
-        const container = document.getElementById("viralLockContainer");
-        if (container.style.display !== "none") {
-            container.classList.add("unlocked");
-            document.getElementById("idStatus").textContent = "UNLOCKED";
-            document.getElementById("idStatus").style.color = "#000";
-        }
-    };
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        const name = document.getElementById("nameInput").value.trim() || "Gast";
+        await setDoc(doc(db, 'leaderboard', currentUser.uid), { name, score: state.score, uid: currentUser.uid });
+        document.getElementById("saveScoreSection").style.display = "none";
+    });
 
-    const handleShare = () => {
-        fxClick();
-        const idClass = document.getElementById("idClass").textContent;
-        const shareText = `Ich habe Score ${state.score} erreicht (Class: ${idClass}). Fokus ist Luxus. Die meisten scheitern. Hast du ihn?`;
-        const url = window.location.href;
-        
-        if (navigator.share) { 
-            navigator.share({ title: 'Focus System', text: shareText, url: url })
-            .then(triggerViralUnlock).catch(() => triggerViralUnlock()); 
-        } else {
-            const textArea = document.createElement("textarea");
-            textArea.value = `${shareText} ${url}`;
-            textArea.style.position = "fixed"; document.body.appendChild(textArea);
-            textArea.focus(); textArea.select();
-            try { document.execCommand('copy'); } catch (err) {}
-            document.body.removeChild(textArea);
-            triggerViralUnlock();
-            
-            const standardBtn = document.getElementById("shareBtnStandard");
-            if(standardBtn.style.display !== "none") {
-                standardBtn.textContent = "LINK KOPIERT!";
-                setTimeout(() => standardBtn.textContent = "EGO BEWEISEN (SHARE)", 2000);
-            }
-        }
-    };
-
-    document.getElementById("shareBtnUnlock").addEventListener("click", handleShare);
-    document.getElementById("shareBtnStandard").addEventListener("click", handleShare);
-
-    canvas.addEventListener("mousedown", handleInput);
-    canvas.addEventListener("touchend", (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
-    
     loop();
 </script>
 </body>
 </html>
-
-
-```
