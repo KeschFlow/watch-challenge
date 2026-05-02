@@ -263,18 +263,35 @@
     resizeCanvas();
 
     class Box {
-        constructor(id, x, y, size) { this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; this.lift=0; }
+        constructor(id, x, y, size) { 
+            this.id=id; this.x=x; this.y=y; this.w=size; this.h=size; 
+            this.lift=0; 
+            this.scale=1; // NEU: Für 3D-Tiefenwirkung
+            this.z=0;     // NEU: Sortierung (vorne/hinten)
+        }
         draw() {
-            ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
+            ctx.save(); 
+            ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift);
             
-            ctx.fillStyle = "var(--mg-box)";
+            // 3D-Skalierung anwenden
+            ctx.scale(this.scale, this.scale);
+            
+            // Leichter 3D-Schatten, der größer wird, wenn die Kiste "vorne" ist
+            if (this.scale > 1) {
+                ctx.shadowColor = "rgba(0,0,0,0.4)";
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetY = 10;
+            }
+
+            // Canvas versteht keine CSS-Variablen. Wieder echte Hex-Farben!
+            ctx.fillStyle = "#222222"; // MG Anthrazit
             ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
             ctx.strokeStyle = "#ffffff";
             ctx.lineWidth = 2;
             ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
 
             if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
-                ctx.fillStyle="var(--mg-gold)";
+                ctx.fillStyle="#c5a059"; // MG Gold
                 const s = this.w*0.2; ctx.beginPath();
                 ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
                 ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.6, 0);
@@ -309,7 +326,7 @@
             setTimeout(() => document.body.classList.remove("hard-mode-flash"), 500);
         }
 
-        state.swapsRemaining = 3 + Math.floor(state.score * 0.5);
+        state.swapsRemaining = 3 + Math.floor(state.score * 0.6);
         setPhase("show");
         const showTime = state.score >= 10 ? 800 : 1200;
         setTimeout(() => { if(state.running) setPhase("shuffle"); }, showTime);
@@ -320,12 +337,23 @@
         let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
         while(a === b) b = Math.floor(Math.random() * boxes.length);
         
-        let baseSpeed = 0.04; let maxSpeed = 0.18;
-        if (state.score >= 10) { baseSpeed = 0.07; maxSpeed = 0.25; }
-        const speed = Math.min(maxSpeed, baseSpeed + state.score * 0.005);
-        const offset = (Math.random() - 0.5) * 60;
+        // Knackigere Casino-Geschwindigkeit
+        let baseSpeed = 0.04; 
+        let maxSpeed = 0.12; 
+        if (state.score >= 10) { baseSpeed = 0.06; maxSpeed = 0.18; }
+        const speed = Math.min(maxSpeed, baseSpeed + state.score * 0.003);
+        
+        // Dynamische Bogenhöhe basierend auf der Distanz der Kisten
+        const distance = Math.abs(boxes[a].x - boxes[b].x) + Math.abs(boxes[a].y - boxes[b].y);
+        const direction = Math.random() > 0.5 ? 1 : -1;
+        const arcHeight = direction * Math.min(distance * 0.35, 100);
 
-        state.activeSwap = { aIdx: a, bIdx: b, sax: boxes[a].x, say: boxes[a].y, sbx: boxes[b].x, sby: boxes[b].y, midY: (boxes[a].y + boxes[b].y)/2 + offset, p: 0, spd: speed };
+        state.activeSwap = { 
+            aIdx: a, bIdx: b, 
+            sax: boxes[a].x, say: boxes[a].y, 
+            sbx: boxes[b].x, sby: boxes[b].y, 
+            arcH: arcHeight, p: 0, spd: speed 
+        };
         state.swapsRemaining--;
     }
 
@@ -335,17 +363,41 @@
         if (state.phase === "shuffle") {
             if (!state.activeSwap) shuffle();
             else {
-                state.activeSwap.p += state.activeSwap.spd; const p = Math.min(1, state.activeSwap.p);
-                const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+                state.activeSwap.p += state.activeSwap.spd; 
+                const p = Math.min(1, state.activeSwap.p);
                 
+                // ULTIMATE PHYSICS: "Cubic Easing" (Startet zäh, peitscht in der Mitte, bremst weich)
+                const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+                const arc = Math.sin(p * Math.PI);
+                
+                // 3D Skalierung (Max 15% größer/kleiner)
+                const scaleEffect = arc * 0.15;
+                const sign = Math.sign(state.activeSwap.arcH) || 1;
+
+                // Kiste A
                 boxes[state.activeSwap.aIdx].x = state.activeSwap.sax + (state.activeSwap.sbx - state.activeSwap.sax) * ease;
-                boxes[state.activeSwap.aIdx].y = state.activeSwap.say + (state.activeSwap.midY - state.activeSwap.say) * Math.sin(p * Math.PI);
+                boxes[state.activeSwap.aIdx].y = state.activeSwap.say + (state.activeSwap.sby - state.activeSwap.say) * ease - (state.activeSwap.arcH * arc);
+                boxes[state.activeSwap.aIdx].scale = 1 - (sign * scaleEffect);
+                boxes[state.activeSwap.aIdx].z = boxes[state.activeSwap.aIdx].scale;
+
+                // Kiste B (Gegenrichtung & Gegenskalierung)
                 boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx + (state.activeSwap.sax - state.activeSwap.sbx) * ease;
-                boxes[state.activeSwap.bIdx].y = state.activeSwap.sby + (state.activeSwap.midY - state.activeSwap.sby) * Math.sin(p * Math.PI);
+                boxes[state.activeSwap.bIdx].y = state.activeSwap.sby + (state.activeSwap.say - state.activeSwap.sby) * ease + (state.activeSwap.arcH * arc);
+                boxes[state.activeSwap.bIdx].scale = 1 + (sign * scaleEffect);
+                boxes[state.activeSwap.bIdx].z = boxes[state.activeSwap.bIdx].scale;
                 
                 if (p >= 1) {
-                    const a = state.activeSwap.aIdx; const b = state.activeSwap.bIdx;
-                    let tempId = boxes[a].id; boxes[a].id = boxes[b].id; boxes[b].id = tempId;
+                    // Reset nach dem Tausch
+                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sbx;
+                    boxes[state.activeSwap.aIdx].y = state.activeSwap.sby;
+                    boxes[state.activeSwap.aIdx].scale = 1;
+                    boxes[state.activeSwap.aIdx].z = 0;
+
+                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sax;
+                    boxes[state.activeSwap.bIdx].y = state.activeSwap.say;
+                    boxes[state.activeSwap.bIdx].scale = 1;
+                    boxes[state.activeSwap.bIdx].z = 0;
+                    
                     state.activeSwap = null;
                 }
             }
@@ -355,14 +407,24 @@
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
                     if (navigator.vibrate) navigator.vibrate(50);
-                    state.score++; state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2.2));
+                    state.score++; 
+                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 2));
                     updateHUD(); buildRound();
                 } else endGame();
             }
         }
     }
 
-    function loop() { if (state.running || state.phase === "reveal") update(); ctx.clearRect(0, 0, canvas.width, canvas.height); boxes.forEach(bx => bx.draw()); requestAnimationFrame(loop); }
+    function loop() { 
+        if (state.running || state.phase === "reveal") update(); 
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        
+        // ZEICHNEN MIT 3D-TIEFE: Kleinere Kisten zuerst zeichnen, größere überlagern sie!
+        const sortedBoxes = [...boxes].sort((a, b) => a.z - b.z);
+        sortedBoxes.forEach(bx => bx.draw()); 
+        
+        requestAnimationFrame(loop); 
+    }
     
     function updateHUD() { 
         document.getElementById("scoreValue").textContent = state.score; 
@@ -408,8 +470,16 @@
     
     document.getElementById("restartBtn").addEventListener("click", () => {
         document.getElementById("gameOverOverlay").classList.add("hidden");
-        document.getElementById("startOverlay").classList.remove("hidden");
-        loadLeaderboard();
+        // FIX: Sofortiger Neustart der Challenge, kein Umweg über das Menü!
+        state.running = true; 
+        state.score = 0; 
+        state.boxCount = 2; 
+        state.hardModeTriggered = false;
+        updateHUD(); 
+        buildRound(); 
+        
+        // Leaderboard im Hintergrund heimlich neu laden
+        if (currentUser) loadLeaderboard();
     });
 
     document.getElementById("saveBtn").addEventListener("click", async () => {
