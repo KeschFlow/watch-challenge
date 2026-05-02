@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- 1.1 META DATEN (Für WhatsApp, Instagram & Co. Vorschau) -->
-    <title>MG PRECISION | RANGKAMPF</title>
+    <title>MG PRECISION | THE CHALLENGE</title>
     <meta property="og:title" content="MG PRECISION | THE CHALLENGE">
     <meta property="og:description" content="Finde die Kiste mit der Krone. Knackst du den Rekord?">
     <meta property="og:image" content="preview.jpg"> <!-- Bild-Datei muss im selben Ordner liegen -->
@@ -29,12 +29,11 @@
             --text-dunkel: #000000;       /* Text auf hellen Elementen */
             --text-button-haupt: #000000; /* Text auf dem Haupt-Button (z.B. Schwarz auf Gold) */
 
-            /* Game Over & Leaderboard Design (Dunkles Theme) */
+            /* Game Over & Rank Design (Dunkles Theme) */
             --karten-bg: #1a1a1a;         /* Hintergrundfarbe der Menü-Karten */
             --karten-text: #ffffff;       /* Haupt-Textfarbe in den Karten */
-            --lb-bg: #222222;             /* Hintergrund der Rangliste */
-            --lb-rand: #333333;           /* Rahmenlinien in der Rangliste */
-            --input-bg: #111111;          /* Hintergrund des Namens-Eingabefeldes */
+            --lb-bg: #222222;             /* Hintergrund der Ränge-Liste */
+            --lb-rand: #333333;           /* Rahmenlinien in der Ränge-Liste */
             --btn-share-bg: #25D366;      /* WhatsApp Grün für den Teilen-Button */
         }
     </style>
@@ -54,29 +53,28 @@
             shopLink: "https://marcgebauer.com/collections/all",
             btnRetryText: "NOCHMAL SPIELEN",
 
-            // Texte der Rangliste
-            ranglisteTitel: "TOP 5",
-            platzhalterName: "Dein Name...",
-            btnEintragen: "EINTRAGEN",
+            // Texte der Ränge-Übersicht
+            ranglisteTitel: "RÄNGE & ZIELE",
 
-            // NEU: 1. Rang-System (Titel nach Punkten)
+            // NEU: 1. Rang-System (Karriere-Leiter nach Punkten)
             rangSystem: [
-                { minScore: 0, titel: "Praktikant 🥉" },
-                { minScore: 5, titel: "Uhren-Azubi 🥈" },
-                { minScore: 10, titel: "Sales Manager 🥇" },
-                { minScore: 15, titel: "MG Boss 👑" }
+                { minScore: 0,  titel: "Praktikant 🥉" },
+                { minScore: 5,  titel: "Azubi 🥈" },
+                { minScore: 10, titel: "Vorarbeiter 👷" },
+                { minScore: 15, titel: "Meister 🥇" },
+                { minScore: 20, titel: "Obermacker 👑" }
             ],
 
-            // NEU: 2. Share-Funktion (WhatsApp)
+            // 2. Share-Funktion (WhatsApp)
             btnShareText: "SCORE TEILEN",
             shareNachricht: "Ich habe bei der Challenge einen Score von {SCORE} geschafft! 👑 Schaffst du mehr? Spiel hier: ",
 
-            // NEU: 3. Belohnungs-System (Gutscheincode ab X Punkten)
+            // 3. Belohnungs-System (Gutscheincode ab X Punkten)
             belohnungAktiv: true,           // true = an, false = aus
-            belohnungAbScore: 15,           // Ab wie vielen Punkten gibt es den Code?
+            belohnungAbScore: 20,           // Ab wie vielen Punkten gibt es den Code? (Am besten auf Obermacker setzen)
             gewonnenText: "GEWONNEN!",      // Ersetzt das rote "VERLOREN"
             belohnungNachricht: "Stark! Hier ist dein Rabattcode:",
-            belohnungCode: "MG-MASTER-5",
+            belohnungCode: "MG-MASTER-10",
 
             // Spiel-Grafik
             kistenFarbe: "#000000",       // Farbe der zu mischenden Kisten
@@ -90,6 +88,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--hintergrund); color: var(--text-dunkel); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        .hidden { display: none !important; } /* Globaler Fix für versteckte Elemente */
 
         .hud { 
             background: var(--akzentfarbe); color: var(--text-hell); display: grid; grid-template-columns: repeat(3, 1fr); 
@@ -111,7 +111,6 @@
         }
 
         .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; }
-        .overlay.hidden { display: none !important; }
         
         /* Karten & Leaderboard an Variablen angepasst */
         .card { max-width: 450px; width: 95%; background: var(--karten-bg); padding: 30px 20px; text-align: center; border-radius: 8px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); border-top: 4px solid var(--hauptfarbe); color: var(--karten-text); }
@@ -119,18 +118,13 @@
         
         .leaderboard-container { background: var(--lb-bg); border-radius: 6px; padding: 15px; margin: 20px 0; border: 1px solid var(--lb-rand); }
         .leaderboard-container h3 { font-size: 14px; color: var(--hauptfarbe); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--lb-rand); padding-bottom: 10px; }
-        #leaderboardList { list-style: none; margin-bottom: 15px; text-align: left; }
-        #leaderboardList li { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--lb-rand); font-size: 14px; }
-        #leaderboardList li:nth-child(odd) { background: rgba(255,255,255,0.02); }
-        #leaderboardList li span.lb-score { font-weight: bold; color: var(--hauptfarbe); }
-        #leaderboardList li span.lb-name { color: #ddd; }
+        #rankList { list-style: none; margin-bottom: 0px; text-align: left; }
+        #rankList li { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--lb-rand); font-size: 14px; }
+        #rankList li:last-child { border-bottom: none; }
+        #rankList li:nth-child(odd) { background: rgba(255,255,255,0.02); }
+        #rankList li span.lb-score { font-weight: bold; color: var(--hauptfarbe); }
+        #rankList li span.lb-name { color: #ddd; }
         
-        #nameInputSection { display: flex; gap: 8px; margin-top: 15px; }
-        #playerName { flex-grow: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--lb-rand); border-radius: 4px; font-size: 14px; text-align: center; color: var(--karten-text); outline: none; transition: border-color 0.2s; }
-        #playerName:focus { border-color: var(--hauptfarbe); }
-        #submitScoreBtn { background: var(--hauptfarbe); color: var(--text-button-haupt); border: none; padding: 0 20px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; }
-        #submitScoreBtn:hover { opacity: 0.9; }
-
         /* NEUE STYLES FÜR SHARE & REWARD */
         .button-row { display: flex; gap: 10px; width: 100%; }
         .btn-share { background: var(--btn-share-bg); color: #fff; font-size: 14px; padding: 12px; }
@@ -170,21 +164,17 @@
                 <div id="ui-rank-display" style="font-size: 15px; font-weight: bold; margin-bottom: 2px; color: var(--karten-text);">Praktikant</div>
                 <div id="ui-score-label" style="font-size: 11px; color: #888; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">SCORE</div>
 
-                <!-- NEU: Belohnungs-Box (wird nur bei Gewinn eingeblendet) -->
+                <!-- Belohnungs-Box (wird nur bei Gewinn eingeblendet) -->
                 <div id="rewardSection" class="reward-box hidden">
                     <div id="ui-reward-msg" style="font-size: 13px; color: var(--karten-text);"></div>
                     <div id="ui-reward-code" class="reward-code"></div>
                 </div>
 
                 <div class="leaderboard-container">
-                    <h3 id="ui-lb-title">TOP 5</h3>
-                    <ul id="leaderboardList">
-                        <li>Lade Daten...</li>
+                    <h3 id="ui-lb-title">RÄNGE & ZIELE</h3>
+                    <ul id="rankList">
+                        <!-- Wird vom System generiert -->
                     </ul>
-                    <div id="nameInputSection" class="hidden">
-                        <input type="text" id="playerName" placeholder="...">
-                        <button id="submitScoreBtn">EINTRAGEN</button>
-                    </div>
                 </div>
 
                 <button class="btn btn-collection" id="collectionBtn">SHOP</button>
@@ -196,11 +186,7 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <script>
         // --- TEMPLATE INJEKTION ---
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ui-title').textContent = KUNDE.titel;
@@ -211,95 +197,24 @@
             document.getElementById('collectionBtn').textContent = KUNDE.btnShopText;
             document.getElementById('restartBtn').textContent = KUNDE.btnRetryText;
             document.getElementById('ui-lb-title').textContent = KUNDE.ranglisteTitel;
-            document.getElementById('playerName').placeholder = KUNDE.platzhalterName;
-            document.getElementById('submitScoreBtn').textContent = KUNDE.btnEintragen;
             document.getElementById('shareBtn').textContent = KUNDE.btnShareText;
-        });
 
-        // --- DATENBANK & LEADERBOARD LOGIK ---
-        let db, auth, user, appId;
-        let isDbConnected = false;
-        let currentLeaderboard = [
-            {name: "Master", score: 25}, {name: "Kevin", score: 15}, {name: "Spieler3", score: 8}
-        ]; 
-
-        async function initDB() {
-            try {
-                if (typeof __firebase_config !== 'undefined') {
-                    const firebaseConfig = JSON.parse(__firebase_config);
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-                    appId = typeof __app_id !== 'undefined' ? __app_id : 'template-app';
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-
-                    onAuthStateChanged(auth, (u) => {
-                        user = u;
-                        if(user) {
-                            isDbConnected = true;
-                            loadLeaderboard();
-                        }
-                    });
-                } else {
-                    renderLeaderboard(currentLeaderboard);
-                }
-            } catch(e) {
-                renderLeaderboard(currentLeaderboard);
-            }
-        }
-
-        function loadLeaderboard() {
-            if(!user || !db) return;
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            onSnapshot(colRef, (snapshot) => {
-                let scores = [];
-                snapshot.forEach(doc => scores.push(doc.data()));
-                scores.sort((a, b) => b.score - a.score);
-                currentLeaderboard = scores.slice(0, 5);
-                renderLeaderboard(currentLeaderboard);
-            }, (error) => {
-                console.error("DB Fehler", error);
-            });
-        }
-
-        async function saveScoreToDB(name, score) {
-            if(isDbConnected && user && db) {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-                await addDoc(colRef, { name: name || "Anonym", score: score, timestamp: Date.now() });
-            } else {
-                currentLeaderboard.push({name: name || "Anonym", score: score});
-                currentLeaderboard.sort((a, b) => b.score - a.score);
-                currentLeaderboard = currentLeaderboard.slice(0, 5);
-                renderLeaderboard(currentLeaderboard);
-            }
-        }
-
-        function renderLeaderboard(scores) {
-            const list = document.getElementById("leaderboardList");
+            // Ränge in die Liste füllen (Höchster Rang zuerst)
+            const list = document.getElementById("rankList");
             list.innerHTML = "";
-            if(scores.length === 0) {
-                list.innerHTML = "<li>Noch keine Einträge.</li>";
-                return;
-            }
-            scores.forEach((entry, index) => {
+            const umgekehrteRaenge = [...KUNDE.rangSystem].reverse();
+            umgekehrteRaenge.forEach(rang => {
                 const li = document.createElement("li");
-                li.innerHTML = `<span class="lb-name">${index + 1}. ${entry.name}</span> <span class="lb-score">${entry.score}</span>`;
+                li.innerHTML = `<span class="lb-name">${rang.titel}</span> <span class="lb-score">ab ${rang.minScore}</span>`;
                 list.appendChild(li);
             });
-        }
-
-        initDB();
+        });
 
         // --- SPIEL LOGIK ---
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         let boxes = []; 
-        let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("template_record_v1")||0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
+        let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("template_record_v2")||0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
         document.getElementById("bestValue").textContent = state.best;
 
         class Box {
@@ -316,14 +231,14 @@
                 ctx.fillStyle = KUNDE.kistenFarbe; 
                 ctx.beginPath();
                 if (ctx.roundRect) {
-                    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 12); // 12px Rundung
+                    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 12); 
                 } else {
-                    ctx.rect(-this.w/2, -this.h/2, this.w, this.h); // Fallback für steinalte Browser
+                    ctx.rect(-this.w/2, -this.h/2, this.w, this.h);
                 }
                 ctx.fill();
                 
                 // 3. Dezenter Glanz-Rand für 3D-Look
-                ctx.shadowColor = "transparent"; // Schatten für den Rahmen deaktivieren
+                ctx.shadowColor = "transparent"; 
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
                 ctx.lineWidth = 2;
                 ctx.stroke();
@@ -331,7 +246,7 @@
                 // 4. Symbol (Krone) zeichnen
                 if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
                     ctx.fillStyle = KUNDE.symbolFarbe; 
-                    const s = this.w*0.25; // Symbol etwas größer gemacht
+                    const s = this.w*0.25; 
                     ctx.beginPath();
                     ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
                     ctx.lineTo(s*0.5, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.5, 0);
@@ -397,12 +312,12 @@
             state.running=false; 
             if(state.score > state.best){
                 state.best = state.score; 
-                localStorage.setItem("template_record_v1", state.best); 
+                localStorage.setItem("template_record_v2", state.best); 
                 document.getElementById("bestValue").textContent=state.best;
             }
             document.getElementById("finalScore").textContent=state.score; 
 
-            // NEU: 1. Rang ermitteln
+            // 1. Rang ermitteln
             let currentRank = KUNDE.rangSystem[0].titel;
             for (let i = 0; i < KUNDE.rangSystem.length; i++) {
                 if (state.score >= KUNDE.rangSystem[i].minScore) {
@@ -411,7 +326,7 @@
             }
             document.getElementById("ui-rank-display").textContent = currentRank;
 
-            // NEU: 3. Belohnung prüfen
+            // 3. Belohnung prüfen
             const rewardSec = document.getElementById("rewardSection");
             const titleEl = document.getElementById("ui-lost-title");
             
@@ -428,22 +343,6 @@
             }
 
             document.getElementById("gameOverOverlay").classList.remove("hidden");
-
-            const inputSection = document.getElementById("nameInputSection");
-            inputSection.classList.add("hidden");
-            
-            if(state.score > 0) { 
-                let isTop5 = false;
-                if(currentLeaderboard.length < 5) {
-                    isTop5 = true;
-                } else {
-                    const lowestScore = currentLeaderboard[currentLeaderboard.length - 1].score;
-                    if(state.score > lowestScore) isTop5 = true;
-                }
-                if(isTop5) {
-                    inputSection.classList.remove("hidden");
-                }
-            }
         }
         
         function handleInput(e) {
@@ -462,7 +361,6 @@
         
         document.getElementById("restartBtn").addEventListener("click", () => {
             document.getElementById("gameOverOverlay").classList.add("hidden");
-            document.getElementById("nameInputSection").classList.add("hidden");
             state.running=true; state.score=0; state.boxCount=2; updateHUD(); buildRound();
         });
 
@@ -470,19 +368,11 @@
             window.open(KUNDE.shopLink, "_blank");
         });
 
-        // NEU: 2. Share-Funktion ausführen
+        // Share-Funktion ausführen
         document.getElementById("shareBtn").addEventListener("click", () => {
             const text = KUNDE.shareNachricht.replace("{SCORE}", state.score) + window.location.href;
             const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
             window.open(whatsappUrl, "_blank");
-        });
-
-        document.getElementById("submitScoreBtn").addEventListener("click", async () => {
-            const name = document.getElementById("playerName").value.trim();
-            if(name) {
-                document.getElementById("nameInputSection").classList.add("hidden");
-                await saveScoreToDB(name, state.score);
-            }
         });
 
         canvas.addEventListener("mousedown", handleInput); 
