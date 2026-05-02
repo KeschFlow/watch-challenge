@@ -3,199 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE CHALLENGE | Eddie's World Edition</title>
+    <title>MG PRECISION CHALLENGE | BY EDDIE'S WORLD</title>
     <style>
-        :root { --gold: #d4af37; --black: #000; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', serif; }
-        
-        body { 
-            background: var(--black);
-            /* Eddie, dieser Teil sucht jetzt AUTOMATISCH nach deinem Bild */
-            background-image: url('pacman_bg.png'), url('pacman_bg.jpg'), url('pacman_bg.png.png'), url('pacman_bg.jpg.png'); 
+        :root {
+            --titan: #e5e5e7; /* Heller Titan-Look */
+            --steel: #8e8e93; /* Gebürsteter Stahl */
+            --black: #000000;
+            --white: #ffffff;
+            --accent: #ffffff; /* Marc Gebauer Style: Weiß auf Schwarz */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hintergrundbild von Marc & Miss Pacman */
+        #bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('pacman_bg.png'), url('pacman_bg.jpg'); /* Sucht automatisch */
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
-            color: #fff; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            overflow: hidden; 
+            z-index: 1;
         }
 
-        #game-container { 
-            position: relative; 
-            border: 2px solid var(--gold); 
-            background: rgba(0, 0, 0, 0.7); 
-            width: 95vw; 
-            height: 75vh; 
-            max-width: 1100px; 
-            box-shadow: 0 0 60px rgba(212, 175, 55, 0.4); 
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+        /* Subtiler Dark-Overlay für Lesbarkeit */
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 2;
         }
 
-        canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
-        
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 100; padding: 20px; }
-        
-        h1 { color: var(--gold); font-size: clamp(28px, 6vw, 52px); margin-bottom: 10px; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
-        
-        .btn-gold { background: var(--gold); color: #000; padding: 18px 45px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; font-size: 16px; letter-spacing: 2px; text-decoration: none; display: inline-block; transition: 0.3s; margin: 10px; }
-        .btn-gold:hover { background: #fff; transform: scale(1.05); }
+        /* UI Header */
+        .hud {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 15px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-        .ui-top { position: absolute; top: -50px; width: 100%; display: flex; justify-content: space-between; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .stat .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--steel); margin-bottom: 4px; }
+        .stat .value { font-size: 18px; font-weight: 700; color: var(--titan); }
+
+        /* Game Area */
+        .game-shell {
+            position: relative;
+            flex-grow: 1;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            cursor: pointer;
+            z-index: 6;
+        }
+
+        /* Overlays (Start/Ende) */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .overlay.hidden { display: none; }
+
+        .card {
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid var(--steel);
+            padding: 40px 20px;
+            background: var(--black);
+        }
+
+        h1 { font-size: 24px; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 10px; font-weight: 300; }
+        p { font-size: 12px; color: var(--steel); margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .btn {
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            padding: 16px 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover { background: var(--titan); transform: translateY(-2px); }
+
+        @media (max-width: 600px) {
+            .hud { grid-template-columns: repeat(2, 1fr); padding: 10px; }
+            h1 { font-size: 20px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div class="ui-top">
-            <div>LEVEL: <span id="levelValue">1</span></div>
-            <div>RECORD: <span id="bestValue">0</span></div>
-        </div>
-        <canvas id="gameCanvas"></canvas>
+    <div id="bg-image"></div>
+    <div id="bg-overlay"></div>
 
-        <div id="startOverlay" class="overlay">
-            <h1>THE CHALLENGE</h1>
-            <p style="color:var(--gold); letter-spacing: 3px; margin-bottom: 30px; font-weight: bold;">EDDIE'S WORLD x MARC GEBAUER</p>
-            <button class="btn-gold" onclick="startGame()">START MISSION</button>
+    <section class="hud">
+        <div class="stat"><div class="label">Precision</div><div class="value" id="scoreValue">0</div></div>
+        <div class="stat"><div class="label">Round</div><div class="value" id="roundValue">1</div></div>
+        <div class="stat"><div class="label">Units</div><div class="value" id="boxValue">2</div></div>
+        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
+    </section>
+
+    <main class="game-shell">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+        <div class="overlay" id="startOverlay">
+            <div class="card">
+                <h1>THE CHALLENGE</h1>
+                <p>MG PRECISION X EDDIE'S WORLD</p>
+                <button class="btn" id="startBtn">Start Mission</button>
+            </div>
         </div>
 
-        <div id="gameOverOverlay" class="overlay" style="display:none;">
-            <h1 style="color:#ff4444;">FOCUS LOST</h1>
-            <p style="color:#aaa; margin-bottom:30px; font-style: italic;">Precision is everything. Marc is waiting.</p>
-            
-            <a href="https://marcgebauer.com" target="_blank" class="btn-gold">VIEW COLLECTION</a>
-            <button style="background:none; color:white; border:1px solid white; padding:12px 25px; cursor:pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="location.reload()">RETRY</button>
-            
-            <p style="margin-top:50px; font-size:11px; color:#555; letter-spacing:3px; text-transform: uppercase;">
-                DEVELOPED BY KEVIN SCHULZE | EDDIE'S WORLD
-            </p>
+        <div class="overlay hidden" id="gameOverOverlay">
+            <div class="card">
+                <h1 style="color: #ff3b30;">FOCUS LOST</h1>
+                <div id="finalScore" style="font-size: 60px; margin: 20px 0;">0</div>
+                <p>Precision is luxury. Try again.</p>
+                <button class="btn" id="restartBtn">Retry Mission</button>
+                <a href="https://marcgebauer.com" target="_blank" style="display:block; margin-top: 20px; color: white; text-decoration: none; font-size: 10px; letter-spacing: 2px;">VIEW COLLECTION</a>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const levelEl = document.getElementById('levelValue');
-        const bestEl = document.getElementById('bestValue');
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        
+        // UI Refs
+        const scoreValue = document.getElementById("scoreValue");
+        const roundValue = document.getElementById("roundValue");
+        const boxValue = document.getElementById("boxValue");
+        const bestValue = document.getElementById("bestValue");
+        const startOverlay = document.getElementById("startOverlay");
+        const gameOverOverlay = document.getElementById("gameOverOverlay");
 
-        let level = 1;
-        let best = localStorage.getItem('precisionRecord') || 0;
+        // Spielstatus (basierend auf deiner Eddie-Logik)
+        let state = {
+            running: false,
+            score: 0,
+            round: 1,
+            boxCount: 2,
+            best: localStorage.getItem("mg_best") || 0,
+            phase: "idle", // show, shuffle, pick, reveal
+            phaseStartedAt: 0,
+            correctBoxId: null,
+            selectedBoxId: null,
+            swapsRemaining: 0,
+            activeSwap: null
+        };
+
         let boxes = [];
-        let winningId = 0;
-        let state = "idle"; 
-        bestEl.innerText = best;
+        bestValue.textContent = state.best;
 
-        function resize() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+        function setPhase(p) {
+            state.phase = p;
+            state.phaseStartedAt = performance.now();
         }
-        window.addEventListener('resize', resize);
-        resize();
 
-        class Box {
-            constructor(id, total) {
+        // Titan-Box Klasse
+        class TitanBox {
+            constructor(id, x, y, size) {
                 this.id = id;
-                this.updateSize(total);
-                this.y = canvas.height / 2;
-                this.x = (canvas.width / (total + 1)) * (id + 1);
-                this.targetX = this.x;
+                this.x = x; this.y = y;
+                this.w = size; this.h = size;
+                this.lift = 0;
             }
-            updateSize(total) {
-                this.size = Math.min(140, (canvas.width / (total + 1.8)));
-            }
-            draw(showContent) {
-                ctx.fillStyle = 'rgba(20, 20, 20, 0.9)';
-                ctx.strokeStyle = '#d4af37';
-                ctx.lineWidth = 3;
-                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
-                ctx.strokeRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
                 
-                if (showContent && this.id === winningId) {
-                    this.drawCrown(this.x, this.y);
+                // Box Body (Titan/Silber Look)
+                ctx.strokeStyle = "rgba(255,255,255,0.8)";
+                ctx.lineWidth = 2;
+                ctx.fillStyle = "rgba(20,20,20,0.9)";
+                ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+                ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
+
+                // MG Logo Platzhalter auf der Box
+                ctx.fillStyle = "rgba(255,255,255,0.1)";
+                ctx.font = "bold 12px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("MG", 0, 5);
+
+                // Wenn gewonnen: Krone zeigen (wie im Marc-Code)
+                if (state.phase === "reveal" && this.id === state.correctBoxId) {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.moveTo(-15, -5); ctx.lineTo(15, -5); ctx.lineTo(15, -15);
+                    ctx.lineTo(8, -10); ctx.lineTo(0, -20); ctx.lineTo(-8, -10);
+                    ctx.lineTo(-15, -15); ctx.closePath(); ctx.fill();
                 }
-            }
-            drawCrown(x, y) {
-                const s = this.size * 0.5;
-                ctx.fillStyle = '#d4af37';
-                ctx.beginPath();
-                ctx.moveTo(x - s/2, y + s/3);
-                ctx.lineTo(x + s/2, y + s/3);
-                ctx.lineTo(x + s/2, y - s/4);
-                ctx.lineTo(x + s/4, y + s/8);
-                ctx.lineTo(x, y - s/2);
-                ctx.lineTo(x - s/4, y + s/8);
-                ctx.lineTo(x - s/2, y - s/4);
-                ctx.closePath();
-                ctx.fill();
+                ctx.restore();
             }
         }
 
-        function startGame() {
-            document.getElementById('startOverlay').style.display = 'none';
-            level = 1;
-            nextLevel();
-        }
-
-        function nextLevel() {
-            state = "showing";
-            levelEl.innerText = level;
-            const count = Math.min(level + 1, 7); 
+        function buildRound() {
             boxes = [];
-            for(let i=0; i<count; i++) boxes.push(new Box(i, count));
-            winningId = Math.floor(Math.random() * count);
-            setTimeout(() => { state = "shuffling"; shuffle(); }, 1200);
+            const count = state.boxCount;
+            const size = Math.min(100, (canvas.width / (count + 2)));
+            const spacing = 30;
+            const totalW = count * size + (count - 1) * spacing;
+            let startX = (canvas.width - totalW) / 2;
+
+            for (let i = 0; i < count; i++) {
+                boxes.push(new TitanBox(i, startX + i * (size + spacing), canvas.height / 2 - size/2, size));
+            }
+            state.correctBoxId = Math.floor(Math.random() * count);
+            setPhase("show");
+            setTimeout(() => setPhase("shuffle"), 1000);
         }
 
         function shuffle() {
-            let moves = 0;
-            let maxMoves = 5 + level * 2;
-            let speed = Math.max(110, 500 - (level * 40));
-            const interval = setInterval(() => {
-                let i = Math.floor(Math.random() * boxes.length);
-                let j = Math.floor(Math.random() * boxes.length);
-                while(i === j) j = Math.floor(Math.random() * boxes.length);
-                let temp = boxes[i].targetX;
-                boxes[i].targetX = boxes[j].targetX;
-                boxes[j].targetX = temp;
-                moves++;
-                if(moves >= maxMoves) { clearInterval(interval); state = "waiting"; }
-            }, speed);
+            if (state.swapsRemaining <= 0) {
+                setPhase("pick");
+                return;
+            }
+            let a = Math.floor(Math.random() * boxes.length);
+            let b = Math.floor(Math.random() * boxes.length);
+            while(a === b) b = Math.floor(Math.random() * boxes.length);
+
+            state.activeSwap = {
+                aIdx: a, bIdx: b,
+                startX: boxes[a].x, targetX: boxes[b].x,
+                startY: boxes[a].y, targetY: boxes[b].y,
+                progress: 0,
+                speed: 0.05 + (state.score * 0.01)
+            };
+            state.swapsRemaining--;
         }
 
-        function animate() {
-            ctx.clearRect(0,0, canvas.width, canvas.height);
-            boxes.forEach(b => {
-                b.x += (b.targetX - b.x) * 0.2;
-                b.draw(state === "showing");
-            });
-            requestAnimationFrame(animate);
-        }
+        function update() {
+            if (state.phase === "shuffle") {
+                if (!state.activeSwap) {
+                    shuffle();
+                } else {
+                    state.activeSwap.progress += state.activeSwap.speed;
+                    const p = Math.min(1, state.activeSwap.progress);
+                    // Ease
+                    const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+                    
+                    boxes[state.activeSwap.aIdx].x = state.activeSwap.startX + (state.activeSwap.targetX - state.activeSwap.startX) * ease;
+                    boxes[state.activeSwap.bIdx].x = state.activeSwap.targetX + (state.activeSwap.startX - state.activeSwap.targetX) * ease;
 
-        canvas.addEventListener('mousedown', (e) => {
-            if(state !== "waiting") return;
-            const rect = canvas.getBoundingClientRect();
-            const mX = e.clientX - rect.left;
-            const mY = e.clientY - rect.top;
-            boxes.forEach(b => {
-                if(Math.abs(mX - b.x) < b.size/2 && Math.abs(mY - b.y) < b.size/2) {
-                    if(b.id === winningId) { level++; nextLevel(); }
-                    else { 
-                        state = "over"; 
-                        if(level-1 > best) { 
-                            best = level-1; 
-                            localStorage.setItem('precisionRecord', best); 
-                            bestEl.innerText = best; 
-                        } 
-                        document.getElementById('gameOverOverlay').style.display = 'flex'; 
+                    if (p >= 1) {
+                        state.activeSwap = null;
                     }
                 }
-            });
-        });
+            }
 
-        animate();
+            if (state.phase === "reveal") {
+                boxes.forEach(b => {
+                    if (b.id === state.correctBoxId || b.id === state.selectedBoxId) {
+                        b.lift = Math.min(40, b.lift + 4);
+                    }
+                });
+                if (performance.now() - state.phaseStartedAt > 1500) {
+                    if (state.selectedBoxId === state.correctBoxId) {
+                        state.score++;
+                        state.round++;
+                        state.boxCount = Math.min(6, 2 + Math.floor(state.score / 2));
+                        updateHUD();
+                        buildRound();
+                    } else {
+                        endGame();
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            boxes.forEach(b => b.draw());
+            
+            if (state.phase === "show") {
+                ctx.fillStyle = "white";
+                ctx.font = "10px Arial";
+                ctx.textAlign = "center";
+                const b = boxes[state.correctBoxId];
+                ctx.fillText("WATCH HERE", b.x + b.w/2, b.y - 20);
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function updateHUD() {
+            scoreValue.textContent = state.score;
+            roundValue.textContent = state.round;
+            boxValue.textContent = state.boxCount;
+        }
+
+        function endGame() {
+            state.running = false;
+            if (state.score > state.best) {
+                state.best = state.score;
+                localStorage.setItem("mg_best", state.best);
+                bestValue.textContent = state.best;
+            }
+            document.getElementById("finalScore").textContent = state.score;
+            gameOverOverlay.classList.remove("hidden");
+        }
+
+        function handleInput(e) {
+            if (state.phase !== "pick") return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = x * scaleX;
+            const clickY = y * scaleY;
+
+            boxes.forEach(b => {
+                if (clickX > b.x && clickX < b.x + b.w && clickY > b.y && clickY < b.y + b.h) {
+                    state.selectedBoxId = b.id;
+                    setPhase("reveal");
+                }
+            });
+        }
+
+        document.getElementById("startBtn").onclick = () => {
+            startOverlay.classList.add("hidden");
+            state.score = 0; state.round = 1; state.boxCount = 2;
+            state.swapsRemaining = 5;
+            updateHUD();
+            buildRound();
+        };
+
+        document.getElementById("restartBtn").onclick = () => location.reload();
+        
+        canvas.addEventListener("mousedown", handleInput);
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); });
+
+        loop();
     </script>
 </body>
 </html>
