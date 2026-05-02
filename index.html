@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MG PRECISION | MASTER BUILD</title>
+    <title>MG PRECISION | CORPORATE EDITION</title>
     <style>
         :root { 
-            --gold: #c5a059; 
-            --titan: #ffffff; 
-            --bg: #e5e5e7; /* Heller Platin-Hintergrund für maximalen Kontrast */
-            --box: #1a1a1a;
+            --mg-dark: #343536; /* Das Graphit aus dem MG Header */
+            --mg-light: #f1f1f1; /* Das helle Graubeige aus dem Shop-Body */
+            --mg-gold: #c5a059; 
+            --mg-accent: #ffffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: var(--bg); 
-            color: #333; 
+            background: var(--mg-light); 
+            color: var(--mg-dark); 
             height: 100vh; 
             width: 100vw;
             overflow: hidden; 
@@ -24,49 +24,53 @@
             flex-direction: column; 
         }
 
-        /* HUD - Klar und lesbar */
+        /* HUD - Exakt im Stil des MG Menüs */
         .hud { 
             position: absolute; top: 0; left: 0; right: 0;
             z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; padding: 15px; background: rgba(255,255,255,0.8);
-            border-bottom: 1px solid #ccc;
+            gap: 0; padding: 15px; background: var(--mg-dark);
+            border-bottom: 2px solid var(--mg-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .stat { text-align: center; }
-        .stat .label { font-size: 10px; text-transform: uppercase; color: #666; letter-spacing: 1px; }
-        .stat .value { font-size: 20px; font-weight: bold; color: #000; }
+        .stat { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+        .stat:last-child { border-right: none; }
+        .stat .label { font-size: 8px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
+        .stat .value { font-size: 18px; font-weight: bold; color: #fff; }
 
-        /* Spielfeld zentriert */
+        /* Spielfeld */
         .game-shell { 
             flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            width: 100%; height: 100%;
+            width: 100%; height: 100%; padding-top: 60px;
         }
         canvas { 
-            max-width: 90vw; max-height: 75vh; cursor: pointer; 
-            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+            max-width: 95vw; max-height: 75vh; cursor: pointer; 
         }
 
-        /* Overlays */
+        /* Overlays - Im edlen MG Look */
         .overlay { 
-            position: absolute; inset: 0; background: rgba(255, 255, 255, 0.9); 
+            position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); 
             display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; 
         }
         .overlay.hidden { display: none !important; }
+        
         .card { 
-            max-width: 400px; width: 90%; border: 2px solid #000; 
-            padding: 40px; background: #fff; box-shadow: 0 0 50px rgba(0,0,0,0.1);
+            max-width: 420px; width: 90%; border-top: 4px solid var(--mg-gold); 
+            padding: 40px; background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
         
-        h1 { font-size: 24px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; color: #000; }
+        h1 { font-size: 22px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 25px; color: var(--mg-dark); font-weight: 900; }
+        
         .btn { 
-            background: #000; color: #fff; border: none; padding: 18px; 
-            font-weight: 900; text-transform: uppercase; letter-spacing: 2px; 
-            cursor: pointer; width: 100%; margin-bottom: 20px;
+            background: var(--mg-dark); color: #fff; border: none; padding: 16px; 
+            font-weight: 700; text-transform: uppercase; letter-spacing: 2px; 
+            cursor: pointer; width: 100%; margin-bottom: 15px; transition: 0.2s;
         }
-        .dev-link { 
-            color: #666; text-decoration: none; font-size: 12px; font-weight: bold;
-            border-bottom: 1px solid #ccc; padding-bottom: 2px;
-        }
+        .btn:hover { background: var(--mg-gold); }
 
+        .dev-link { 
+            color: #999; text-decoration: none; font-size: 11px; font-weight: bold;
+            letter-spacing: 1px; display: block; margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -84,19 +88,16 @@
             <div class="card">
                 <h1>THE CHALLENGE</h1>
                 <button class="btn" id="startBtn">MISSION STARTEN</button>
-                <div style="margin-top:20px;">
-                    <p style="font-size:10px; margin-bottom:5px;">WANT THIS TOOL?</p>
-                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">CONTACT PARTNER</a>
-                </div>
+                <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">GET THIS TOOL</a>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:#d93025;">FOKUS VERLOREN</h1>
-                <div id="finalScore" style="font-size:70px; color:#000; margin:10px 0; font-weight:900;">0</div>
+                <h1 style="color:#c92a2a;">FOKUS VERLOREN</h1>
+                <div id="finalScore" style="font-size:60px; color:var(--mg-dark); margin:10px 0; font-weight:900;">0</div>
                 <button class="btn" id="restartBtn">RETRY</button>
-                <a href="https://marcgebauer.com" target="_blank" style="color:#000; text-decoration:none; font-weight:bold; font-size:14px;">MARCGEBAUER.COM</a>
+                <a href="https://marcgebauer.com" target="_blank" style="color:var(--mg-gold); text-decoration:none; font-weight:bold; font-size:12px; letter-spacing:1px; text-transform:uppercase;">MarcGebauer.com</a>
             </div>
         </div>
     </main>
@@ -105,10 +106,10 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_final_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
+    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_corp_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
     document.getElementById("bestValue").textContent = state.best;
 
-    class LuxuryBox {
+    class MGBox {
         constructor(id, x, y, size) {
             this.id = id; this.x = x; this.y = y; this.w = size; this.h = size; this.lift = 0;
         }
@@ -116,25 +117,22 @@
             ctx.save();
             ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
             
-            // Die Box (Schwarz mit Gold-Kante für Sichtbarkeit)
-            ctx.fillStyle = "#1a1a1a";
+            // Box Design: Das Graphit-Grau aus dem MG Header
+            ctx.fillStyle = "#343536";
             ctx.strokeStyle = "#c5a059";
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 2;
             ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
             ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
             
-            // Krone (Strahlendes Weiß/Gold Mix)
+            // Krone (In Weiß/Gold für den Kontrast auf Dunkelgrau)
             if ((state.phase === "show" || state.phase === "reveal") && this.id === state.correctBoxId) {
                 ctx.fillStyle = "#ffffff";
-                const s = this.w * 0.2;
+                const s = this.w * 0.18;
                 ctx.beginPath();
-                ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
-                ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.6, 0);
-                ctx.lineTo(-s, -s*0.5); ctx.closePath();
+                ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.4);
+                ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.3); ctx.lineTo(-s*0.6, 0);
+                ctx.lineTo(-s, -s*0.4); ctx.closePath();
                 ctx.fill();
-                // Goldener Akzentpunkt
-                ctx.fillStyle = "#c5a059";
-                ctx.beginPath(); ctx.arc(0, s*0.2, 3, 0, Math.PI*2); ctx.fill();
             }
             ctx.restore();
         }
@@ -142,7 +140,7 @@
 
     function buildRound() {
         let boxesData = [];
-        const areaSize = 700;
+        const areaSize = 750;
         const maxInRow = 5;
         const cols = Math.min(maxInRow, Math.ceil(Math.sqrt(state.boxCount)));
         const rows = Math.ceil(state.boxCount / cols);
@@ -156,20 +154,20 @@
 
         for (let i = 0; i < state.boxCount; i++) {
             const r = Math.floor(i / cols), c = i % cols;
-            boxesData.push(new LuxuryBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
+            boxesData.push(new MGBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
         }
         boxes = boxesData;
         state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        state.swapsRemaining = 4 + Math.floor(state.score * 0.5);
+        state.swapsRemaining = 4 + Math.floor(state.score * 0.4);
         setPhase("show");
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1400);
+        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1300);
     }
 
     function shuffle() {
         if (state.swapsRemaining <= 0) { setPhase("pick"); return; }
         let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
         while(a === b) b = Math.floor(Math.random() * boxes.length);
-        state.activeSwap = { aIdx: a, bIdx: b, startAX: boxes[a].x, startAY: boxes[a].y, startBX: boxes[b].x, startBY: boxes[b].y, progress: 0, speed: 0.03 + (state.score * 0.001) };
+        state.activeSwap = { aIdx: a, bIdx: b, startAX: boxes[a].x, startAY: boxes[a].y, startBX: boxes[b].x, startBY: boxes[b].y, progress: 0, speed: 0.032 + (state.score * 0.001) };
         state.swapsRemaining--;
     }
 
@@ -190,10 +188,10 @@
             }
         }
         if (state.phase === "reveal") {
-            boxes.forEach(b => { if (b.id === state.correctBoxId || b.id === state.selectedBoxId) b.lift = Math.min(40, b.lift + 4); });
+            boxes.forEach(b => { if (b.id === state.correctBoxId || b.id === state.selectedBoxId) b.lift = Math.min(45, b.lift + 5); });
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
-                    state.score++; state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2));
+                    state.score++; state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2.2));
                     updateHUD(); buildRound();
                 } else endGame();
             }
@@ -205,7 +203,7 @@
 
     function endGame() {
         state.running = false;
-        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_final_best", state.best); document.getElementById("bestValue").textContent = state.best; }
+        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_corp_best", state.best); document.getElementById("bestValue").textContent = state.best; }
         document.getElementById("finalScore").textContent = state.score;
         document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
@@ -216,7 +214,7 @@
         const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
         const clickX = (clientX - rect.left) * (canvas.width / rect.width);
         const clickY = ((e.clientY || (e.touches ? e.touches[0].clientY : 0)) - rect.top) * (canvas.height / rect.height);
-        boxes.forEach(b => { if (clickX > b.x && clickX < b.x + b.w && clickY > b.y && clickY < b.y + b.h) { state.selectedBoxId = b.id; setPhase("reveal"); } });
+        boxes.forEach(b => { if (clickX > b.x && clickX < b.x + b.w && clickY > b.y && clickY < b.y + b.h) { if (navigator.vibrate) navigator.vibrate(20); state.selectedBoxId = b.id; setPhase("reveal"); } });
     }
 
     document.getElementById("startBtn").onclick = () => { document.getElementById("startOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; updateHUD(); buildRound(); };
