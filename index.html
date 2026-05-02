@@ -6,11 +6,10 @@
     <title>MG PRECISION CHALLENGE | BY EDDIE'S WORLD</title>
     <style>
         :root {
-            --titan: #e5e5e7; /* Heller Titan-Look */
-            --steel: #8e8e93; /* Gebürsteter Stahl */
+            --titan: #e5e5e7;
+            --steel: #8e8e93;
             --black: #000000;
             --white: #ffffff;
-            --accent: #ffffff; /* Marc Gebauer Style: Weiß auf Schwarz */
         }
 
         * {
@@ -30,20 +29,19 @@
             flex-direction: column;
         }
 
-        /* Hintergrundbild von Marc & Miss Pacman */
+        /* Hintergrundbild Layer */
         #bg-image {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('pacman_bg.png'), url('pacman_bg.jpg'); /* Sucht automatisch */
+            background-image: url('pacman_bg.png'), url('pacman_bg.jpg');
             background-size: cover;
             background-position: center;
             z-index: 1;
         }
 
-        /* Subtiler Dark-Overlay für Lesbarkeit */
         #bg-overlay {
             position: fixed;
             top: 0;
@@ -54,7 +52,7 @@
             z-index: 2;
         }
 
-        /* UI Header */
+        /* Titan Minimal UI */
         .hud {
             position: relative;
             z-index: 10;
@@ -69,8 +67,8 @@
 
         .stat {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 10px;
             text-align: center;
@@ -80,7 +78,6 @@
         .stat .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--steel); margin-bottom: 4px; }
         .stat .value { font-size: 18px; font-weight: 700; color: var(--titan); }
 
-        /* Game Area */
         .game-shell {
             position: relative;
             flex-grow: 1;
@@ -97,7 +94,7 @@
             z-index: 6;
         }
 
-        /* Overlays (Start/Ende) */
+        /* Overlays */
         .overlay {
             position: absolute;
             inset: 0;
@@ -139,8 +136,7 @@
         .btn:hover { background: var(--titan); transform: translateY(-2px); }
 
         @media (max-width: 600px) {
-            .hud { grid-template-columns: repeat(2, 1fr); padding: 10px; }
-            h1 { font-size: 20px; }
+            .hud { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -181,8 +177,8 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
-        
-        // UI Refs
+        let canvasReady = false;
+
         const scoreValue = document.getElementById("scoreValue");
         const roundValue = document.getElementById("roundValue");
         const boxValue = document.getElementById("boxValue");
@@ -190,14 +186,13 @@
         const startOverlay = document.getElementById("startOverlay");
         const gameOverOverlay = document.getElementById("gameOverOverlay");
 
-        // Spielstatus (basierend auf deiner Eddie-Logik)
         let state = {
             running: false,
             score: 0,
             round: 1,
             boxCount: 2,
             best: localStorage.getItem("mg_best") || 0,
-            phase: "idle", // show, shuffle, pick, reveal
+            phase: "idle", 
             phaseStartedAt: 0,
             correctBoxId: null,
             selectedBoxId: null,
@@ -213,7 +208,6 @@
             state.phaseStartedAt = performance.now();
         }
 
-        // Titan-Box Klasse
         class TitanBox {
             constructor(id, x, y, size) {
                 this.id = id;
@@ -225,22 +219,18 @@
             draw() {
                 ctx.save();
                 ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
-                
-                // Box Body (Titan/Silber Look)
                 ctx.strokeStyle = "rgba(255,255,255,0.8)";
                 ctx.lineWidth = 2;
                 ctx.fillStyle = "rgba(20,20,20,0.9)";
                 ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
                 ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
 
-                // MG Logo Platzhalter auf der Box
                 ctx.fillStyle = "rgba(255,255,255,0.1)";
                 ctx.font = "bold 12px Arial";
                 ctx.textAlign = "center";
                 ctx.fillText("MG", 0, 5);
 
-                // Wenn gewonnen: Krone zeigen (wie im Marc-Code)
-                if (state.phase === "reveal" && this.id === state.correctBoxId) {
+                if ((state.phase === "show" || state.phase === "reveal") && this.id === state.correctBoxId) {
                     ctx.fillStyle = "#ffffff";
                     ctx.beginPath();
                     ctx.moveTo(-15, -5); ctx.lineTo(15, -5); ctx.lineTo(15, -15);
@@ -263,8 +253,9 @@
                 boxes.push(new TitanBox(i, startX + i * (size + spacing), canvas.height / 2 - size/2, size));
             }
             state.correctBoxId = Math.floor(Math.random() * count);
+            state.swapsRemaining = 5 + Math.floor(state.score * 1.2);
             setPhase("show");
-            setTimeout(() => setPhase("shuffle"), 1000);
+            setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1200);
         }
 
         function shuffle() {
@@ -281,7 +272,7 @@
                 startX: boxes[a].x, targetX: boxes[b].x,
                 startY: boxes[a].y, targetY: boxes[b].y,
                 progress: 0,
-                speed: 0.05 + (state.score * 0.01)
+                speed: Math.min(0.2, 0.07 + (state.score * 0.008))
             };
             state.swapsRemaining--;
         }
@@ -293,15 +284,10 @@
                 } else {
                     state.activeSwap.progress += state.activeSwap.speed;
                     const p = Math.min(1, state.activeSwap.progress);
-                    // Ease
                     const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-                    
                     boxes[state.activeSwap.aIdx].x = state.activeSwap.startX + (state.activeSwap.targetX - state.activeSwap.startX) * ease;
                     boxes[state.activeSwap.bIdx].x = state.activeSwap.targetX + (state.activeSwap.startX - state.activeSwap.targetX) * ease;
-
-                    if (p >= 1) {
-                        state.activeSwap = null;
-                    }
+                    if (p >= 1) state.activeSwap = null;
                 }
             }
 
@@ -315,10 +301,11 @@
                     if (state.selectedBoxId === state.correctBoxId) {
                         state.score++;
                         state.round++;
-                        state.boxCount = Math.min(6, 2 + Math.floor(state.score / 2));
+                        state.boxCount = Math.min(5, 2 + Math.floor(state.score / 3));
                         updateHUD();
                         buildRound();
                     } else {
+                        if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
                         endGame();
                     }
                 }
@@ -328,18 +315,11 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             boxes.forEach(b => b.draw());
-            
-            if (state.phase === "show") {
-                ctx.fillStyle = "white";
-                ctx.font = "10px Arial";
-                ctx.textAlign = "center";
-                const b = boxes[state.correctBoxId];
-                ctx.fillText("WATCH HERE", b.x + b.w/2, b.y - 20);
-            }
         }
 
         function loop() {
-            update();
+            if (!canvasReady) return requestAnimationFrame(loop);
+            if(state.running || state.phase === "reveal") update();
             draw();
             requestAnimationFrame(loop);
         }
@@ -364,8 +344,11 @@
         function handleInput(e) {
             if (state.phase !== "pick") return;
             const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - rect.left;
-            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
             
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -374,6 +357,7 @@
 
             boxes.forEach(b => {
                 if (clickX > b.x && clickX < b.x + b.w && clickY > b.y && clickY < b.y + b.h) {
+                    if (navigator.vibrate) navigator.vibrate(25);
                     state.selectedBoxId = b.id;
                     setPhase("reveal");
                 }
@@ -382,8 +366,8 @@
 
         document.getElementById("startBtn").onclick = () => {
             startOverlay.classList.add("hidden");
+            state.running = true;
             state.score = 0; state.round = 1; state.boxCount = 2;
-            state.swapsRemaining = 5;
             updateHUD();
             buildRound();
         };
@@ -391,8 +375,10 @@
         document.getElementById("restartBtn").onclick = () => location.reload();
         
         canvas.addEventListener("mousedown", handleInput);
-        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); });
+        canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleInput(e); }, {passive: false});
+        canvas.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
 
+        canvasReady = true;
         loop();
     </script>
 </body>
