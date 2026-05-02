@@ -115,15 +115,21 @@
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
                 <h1 style="color:#c92a2a; margin-bottom:5px;">FOKUS VERLOREN</h1>
-                <p style="font-size:12px; color:#555; font-weight:bold; margin-top:5px; line-height:1.4;">Wie oft noch im echten Leben?<br>Fokus ist Luxus. Die meisten können ihn sich nicht leisten.</p>
                 
-                <div id="finalScore" style="font-size:80px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
+                <!-- BRAND & IDENTITY LAYER -->
+                <div id="rankDisplay" style="font-size: 16px; font-weight: 900; color: var(--mg-gold); letter-spacing: 3px; margin-top: 10px;">RANK: FOCUSED</div>
+                <p id="eddieQuote" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4; min-height: 36px;"></p>
+                
+                <div id="finalScore" style="font-size:80px; font-weight:900; margin:10px 0; color: var(--mg-dark);">0</div>
+                
+                <!-- SOCIAL PROOF -->
+                <p id="percentileDisplay" style="font-size: 11px; color: #888; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;"></p>
                 
                 <div id="shareSection" style="margin-bottom: 20px;">
                     <button class="btn btn-outline" id="shareBtn" style="width: 100%;">EGO BEWEISEN (SHARE)</button>
                 </div>
 
-                <!-- LEAD GEN: EXKLUSIV (Wird nur ab Score 7 angezeigt) -->
+                <!-- LEAD GEN: SHARE-GATED -->
                 <div id="saveScoreSection" style="display: none; margin-bottom: 20px; padding-top: 15px; border-top: 1px solid #eee;">
                     <p style="font-size: 13px; font-weight: 900; margin-bottom: 15px; color: var(--mg-gold); text-transform: uppercase;">TOP TIER REACHED.<br>SICHERE DIR DEINEN SPOT.</p>
                     <input type="text" id="nameInput" placeholder="DEIN NAME ODER INSTA-HANDLE" maxlength="20" autocomplete="off">
@@ -131,6 +137,7 @@
                 </div>
 
                 <button class="btn" id="restartBtn">RETRY</button>
+                <p style="font-size:11px; margin-top:15px; color:#888; text-transform:uppercase; letter-spacing:1px; font-weight:900;">Fokus ist kein Talent.<br>Es ist Entscheidung.</p>
                 <a href="https://marcgebauer.com" target="_blank" style="color:var(--mg-dark); font-weight:bold; text-decoration:none; display:block; margin-top:15px; font-size:12px; text-transform:uppercase;">MARCGEBAUER.COM</a>
             </div>
         </div>
@@ -241,6 +248,16 @@
     function fxCorrect() { playTone(880, 'sine', 0.1, 0.1); setTimeout(() => playTone(1760, 'sine', 0.15, 0.15), 100); }
     function fxWrong() { playTone(150, 'sawtooth', 0.4, 0.3); setTimeout(() => playTone(100, 'sawtooth', 0.5, 0.3), 100); }
 
+    function fxWinVisual() {
+        const shell = document.getElementById("gameShell");
+        shell.style.transition = "background-color 0.1s ease";
+        shell.style.backgroundColor = "var(--mg-gold)";
+        setTimeout(() => {
+            shell.style.transition = "background-color 0.4s ease";
+            shell.style.backgroundColor = "transparent";
+        }, 120);
+    }
+
     // STREAK ENGINE
     let currentStreak = parseInt(localStorage.getItem('mg_streak')) || 0;
     let lastPlayed = localStorage.getItem('mg_lastPlayed');
@@ -258,12 +275,30 @@
     let boxes = [];
     let state = { 
         running: false, score: 0, boxCount: 2, 
+        combo: 0, // DOPAMIN COMBO ENGINE
         best: localStorage.getItem("mg_net_best") || 0, 
         phase: "idle", phaseStartedAt: 0, 
         correctBoxId: null, selectedBoxId: null, 
         swapsRemaining: 0, activeSwap: null,
         hardModeTriggered: false
     };
+
+    // RANK & RETENTION ENGINE
+    let lowScoreStreak = parseInt(localStorage.getItem('mg_lowScore')) || 0;
+    const eddieQuotes = [
+        "Eddie hätte das gehalten.",
+        "Zu langsam. Eddie wartet nicht.",
+        "Fokus verloren. Realität auch?",
+        "Die Kiste ist zu. Und dein Fokus weg."
+    ];
+
+    function getRankName(s) {
+        if (s < 5) return "DISTRACTED";
+        if (s < 12) return "AWARE";
+        if (s < 25) return "FOCUSED";
+        if (s < 45) return "DANGEROUS";
+        return "PRECISION ELITE";
+    }
 
     document.getElementById("bestValue").textContent = state.best;
 
@@ -322,6 +357,8 @@
         }
 
         state.swapsRemaining = 3 + Math.floor(state.score * 0.6);
+        if (state.score >= 12) state.swapsRemaining += 2; // HARDCORE CHAOS
+        
         setPhase("show");
         const showTime = state.score >= 10 ? 800 : 1200;
         setTimeout(() => { if(state.running) setPhase("shuffle"); }, showTime);
@@ -339,8 +376,10 @@
         // DIFFICULTY PATTERN BREAKS
         const isBurst = state.score >= 8 && Math.random() < 0.25; // 25% Chance auf massiven Speed-Spike
         const isFreeze = state.score >= 12 && Math.random() < 0.15; // 15% Chance auf kurzes "Einfrieren" vor dem Tausch
+        const isMultiChaos = state.score >= 15 && Math.random() < 0.2; // Extremes Tempo
         
         if (isBurst) speed *= 1.8;
+        if (isMultiChaos) speed *= 2.5;
         
         const distance = Math.abs(boxes[a].x - boxes[b].x) + Math.abs(boxes[a].y - boxes[b].y);
         const direction = Math.random() > 0.5 ? 1 : -1;
@@ -395,8 +434,11 @@
             boxes.forEach(bx => { if (bx.id === state.correctBoxId || bx.id === state.selectedBoxId) bx.lift = Math.min(45, bx.lift + 5); });
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
-                    state.score++; 
-                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 2));
+                    // COMBO MULTIPLIER (DOPAMIN BOOST)
+                    const comboBonus = state.combo > 1 ? Math.floor((state.combo - 1) * 0.5) : 0;
+                    state.score += 1 + comboBonus; 
+                    
+                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4)); // Skaliert sanfter wegen Combo-Boost
                     updateHUD(); buildRound();
                 } else {
                     endGame();
@@ -414,9 +456,10 @@
     }
     
     function updateHUD() { 
-        document.getElementById("scoreValue").textContent = state.score; 
+        // COMBO VISUALS IM HUD
+        const comboHtml = state.combo > 1 ? `<span style="color: #e67e22; font-size: 14px; margin-left: 6px; animation: pulseFire 0.5s infinite alternate;">🔥x${state.combo}</span>` : "";
+        document.getElementById("scoreValue").innerHTML = `${state.score} ${comboHtml}`; 
         document.getElementById("bestValue").textContent = state.best;
-        // boxValue wurde entfernt, da das HTML-Element durch die "Daily Streak" Anzeige ersetzt wurde.
     }
 
     function endGame() {
@@ -425,9 +468,43 @@
         document.getElementById("finalScore").textContent = state.score;
         updateHUD();
 
-        // LEAD GEN: EXKLUSIVER FILTER (Nur ab Score 7)
+        // 1. IDENTITÄT: RANK SYSTEM
+        const rankDisplay = document.getElementById("rankDisplay");
+        if(rankDisplay) rankDisplay.textContent = `RANK: ${getRankName(state.score)}`;
+
+        // 2. SOCIAL PROOF: PERCENTILE
+        const percentileDisplay = document.getElementById("percentileDisplay");
+        const percentile = Math.min(99, Math.max(10, Math.floor(20 + state.score * 3.5)));
+        if(percentileDisplay) percentileDisplay.textContent = `Fokussierter als ${percentile}% der Spieler`;
+
+        // 3. RETENTION KILL SWITCH & EDDIE VOICE
+        if (state.score < 5) lowScoreStreak++; else lowScoreStreak = 0;
+        localStorage.setItem('mg_lowScore', lowScoreStreak);
+        
+        const eddieQuoteEl = document.getElementById("eddieQuote");
+        if(eddieQuoteEl) {
+            if (lowScoreStreak >= 3) {
+                eddieQuoteEl.textContent = "Du bist nicht fokussiert. Trainier das. Keine Ausreden mehr.";
+                eddieQuoteEl.style.color = "#c92a2a";
+            } else {
+                eddieQuoteEl.textContent = eddieQuotes[Math.floor(Math.random() * eddieQuotes.length)];
+                eddieQuoteEl.style.color = "#555";
+            }
+        }
+
+        // 4. FORCED VIRAL LOOP (SHARE-GATE)
         const saveSection = document.getElementById("saveScoreSection");
-        saveSection.style.display = (state.score >= 7) ? "block" : "none";
+        const shareBtn = document.getElementById("shareBtn");
+        
+        if (state.score >= 7) {
+            saveSection.style.display = "none"; // VERSTECKT!
+            shareBtn.textContent = "EGO BEWEISEN UM ZU RANKEN (SHARE)";
+            shareBtn.dataset.gatesave = "true";
+        } else {
+            saveSection.style.display = "block"; // NORMAL OFFEN UNTER 7
+            shareBtn.textContent = "EGO BEWEISEN (SHARE)";
+            shareBtn.dataset.gatesave = "false";
+        }
 
         document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
@@ -450,9 +527,12 @@
                 
                 // GAME FEEL: SUCCESS OR FAIL
                 if(bx.id === state.correctBoxId) {
+                    state.combo++; // COMBO AUFBAUEN
                     fxCorrect();
+                    fxWinVisual(); // DOPAMIN SPIKE
                     if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
                 } else {
+                    state.combo = 0; // COMBO RESET
                     fxWrong();
                     if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
                     // SCREEN SHAKE
@@ -469,14 +549,14 @@
     document.getElementById("startBtn").addEventListener("click", () => { 
         initAudio(); fxClick();
         document.getElementById("startOverlay").classList.add("hidden"); 
-        state.running = true; state.score = 0; state.boxCount = 2; state.hardModeTriggered = false;
+        state.running = true; state.score = 0; state.combo = 0; state.boxCount = 2; state.hardModeTriggered = false;
         updateHUD(); buildRound(); 
     });
     
     document.getElementById("restartBtn").addEventListener("click", () => {
         fxClick();
         document.getElementById("gameOverOverlay").classList.add("hidden");
-        state.running = true; state.score = 0; state.boxCount = 2; state.hardModeTriggered = false;
+        state.running = true; state.score = 0; state.combo = 0; state.boxCount = 2; state.hardModeTriggered = false;
         updateHUD(); buildRound(); 
         if (currentUser) loadLeaderboard();
     });
@@ -512,6 +592,7 @@
         const rankName = getRankName(state.score);
         const shareText = `Ich habe Score ${state.score} erreicht (RANK: ${rankName}). Fokus ist Luxus. Die meisten scheitern. Hast du ihn?`;
         const url = window.location.href;
+        const fullText = `${shareText} ${url}`;
         
         // UNLOCK FUNKTION FÜR DAS SHARE-GATE
         const unlockSaveGate = () => {
@@ -522,17 +603,39 @@
                 btn.classList.add("btn-gold");
             } else {
                 btn.textContent = "LINK KOPIERT!";
-                setTimeout(() => btn.textContent = "EGO BEWEISEN (SHARE)", 2000);
+                setTimeout(() => {
+                    if (btn.dataset.gatesave !== "true") {
+                        btn.textContent = "EGO BEWEISEN (SHARE)";
+                    }
+                }, 2000);
             }
         };
 
         if (navigator.share) { 
             navigator.share({ title: 'MG Challenge', text: shareText, url: url })
             .then(unlockSaveGate)
-            .catch(console.error); 
+            .catch((err) => {
+                console.error("Share cancelled or failed:", err);
+                // Schaltet das Ranking trotzdem frei, falls der User auf "Abbrechen" klickt
+                unlockSaveGate(); 
+            }); 
         } 
         else {
-            navigator.clipboard.writeText(`${shareText} ${url}`);
+            // BULLETPROOF FALLBACK FÜR DESKTOP / ZWISCHENABLAGE
+            const textArea = document.createElement("textarea");
+            textArea.value = fullText;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
             unlockSaveGate();
         }
     });
