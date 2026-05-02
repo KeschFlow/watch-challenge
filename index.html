@@ -35,6 +35,7 @@
             --lb-bg: #222222;             /* Hintergrund der Rangliste */
             --lb-rand: #333333;           /* Rahmenlinien in der Rangliste */
             --input-bg: #111111;          /* Hintergrund des Namens-Eingabefeldes */
+            --btn-share-bg: #25D366;      /* WhatsApp Grün für den Teilen-Button */
         }
     </style>
 
@@ -54,9 +55,28 @@
             btnRetryText: "NOCHMAL SPIELEN",
 
             // Texte der Rangliste
-            ranglisteTitel: "TOP 5 RANGKAMPF",
+            ranglisteTitel: "TOP 5",
             platzhalterName: "Dein Name...",
             btnEintragen: "EINTRAGEN",
+
+            // NEU: 1. Rang-System (Titel nach Punkten)
+            rangSystem: [
+                { minScore: 0, titel: "Praktikant 🥉" },
+                { minScore: 5, titel: "Uhren-Azubi 🥈" },
+                { minScore: 10, titel: "Sales Manager 🥇" },
+                { minScore: 15, titel: "MG Boss 👑" }
+            ],
+
+            // NEU: 2. Share-Funktion (WhatsApp)
+            btnShareText: "SCORE TEILEN",
+            shareNachricht: "Ich habe bei der Challenge einen Score von {SCORE} geschafft! 👑 Schaffst du mehr? Spiel hier: ",
+
+            // NEU: 3. Belohnungs-System (Gutscheincode ab X Punkten)
+            belohnungAktiv: true,           // true = an, false = aus
+            belohnungAbScore: 15,           // Ab wie vielen Punkten gibt es den Code?
+            gewonnenText: "GEWONNEN!",      // Ersetzt das rote "VERLOREN"
+            belohnungNachricht: "Stark! Hier ist dein Rabattcode:",
+            belohnungCode: "MG-MASTER-5",
 
             // Spiel-Grafik
             kistenFarbe: "#000000",       // Farbe der zu mischenden Kisten
@@ -111,6 +131,12 @@
         #submitScoreBtn { background: var(--hauptfarbe); color: var(--text-button-haupt); border: none; padding: 0 20px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: opacity 0.2s; }
         #submitScoreBtn:hover { opacity: 0.9; }
 
+        /* NEUE STYLES FÜR SHARE & REWARD */
+        .button-row { display: flex; gap: 10px; width: 100%; }
+        .btn-share { background: var(--btn-share-bg); color: #fff; font-size: 14px; padding: 12px; }
+        .reward-box { background: rgba(197, 160, 89, 0.15); border: 2px dashed var(--hauptfarbe); padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .reward-code { font-size: 22px; font-weight: bold; color: var(--hauptfarbe); letter-spacing: 2px; margin-top: 5px; user-select: all; }
+
         .btn { border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-bottom: 10px; border-radius: 4px; transition: transform 0.1s, opacity 0.2s; }
         .btn:active { transform: scale(0.98); }
         .btn:hover { opacity: 0.9; }
@@ -141,10 +167,17 @@
             <div class="card">
                 <h1 id="ui-lost-title" style="color:#ff4444; font-size: 22px;">Verloren</h1>
                 <div id="finalScore" style="font-size:55px; font-weight:bold; margin:0; color: var(--hauptfarbe); line-height: 1.1;">0</div>
+                <div id="ui-rank-display" style="font-size: 15px; font-weight: bold; margin-bottom: 2px; color: var(--karten-text);">Praktikant</div>
                 <div id="ui-score-label" style="font-size: 11px; color: #888; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">SCORE</div>
 
+                <!-- NEU: Belohnungs-Box (wird nur bei Gewinn eingeblendet) -->
+                <div id="rewardSection" class="reward-box hidden">
+                    <div id="ui-reward-msg" style="font-size: 13px; color: var(--karten-text);"></div>
+                    <div id="ui-reward-code" class="reward-code"></div>
+                </div>
+
                 <div class="leaderboard-container">
-                    <h3 id="ui-lb-title">RANGKAMPF</h3>
+                    <h3 id="ui-lb-title">TOP 5</h3>
                     <ul id="leaderboardList">
                         <li>Lade Daten...</li>
                     </ul>
@@ -155,7 +188,10 @@
                 </div>
 
                 <button class="btn btn-collection" id="collectionBtn">SHOP</button>
-                <button class="btn btn-retry" id="restartBtn">RETRY</button>
+                <div class="button-row">
+                    <button class="btn btn-share" id="shareBtn">TEILEN</button>
+                    <button class="btn btn-retry" id="restartBtn">RETRY</button>
+                </div>
             </div>
         </div>
     </main>
@@ -177,6 +213,7 @@
             document.getElementById('ui-lb-title').textContent = KUNDE.ranglisteTitel;
             document.getElementById('playerName').placeholder = KUNDE.platzhalterName;
             document.getElementById('submitScoreBtn').textContent = KUNDE.btnEintragen;
+            document.getElementById('shareBtn').textContent = KUNDE.btnShareText;
         });
 
         // --- DATENBANK & LEADERBOARD LOGIK ---
@@ -364,6 +401,32 @@
                 document.getElementById("bestValue").textContent=state.best;
             }
             document.getElementById("finalScore").textContent=state.score; 
+
+            // NEU: 1. Rang ermitteln
+            let currentRank = KUNDE.rangSystem[0].titel;
+            for (let i = 0; i < KUNDE.rangSystem.length; i++) {
+                if (state.score >= KUNDE.rangSystem[i].minScore) {
+                    currentRank = KUNDE.rangSystem[i].titel;
+                }
+            }
+            document.getElementById("ui-rank-display").textContent = currentRank;
+
+            // NEU: 3. Belohnung prüfen
+            const rewardSec = document.getElementById("rewardSection");
+            const titleEl = document.getElementById("ui-lost-title");
+            
+            if (KUNDE.belohnungAktiv && state.score >= KUNDE.belohnungAbScore) {
+                titleEl.textContent = KUNDE.gewonnenText;
+                titleEl.style.color = "var(--hauptfarbe)"; // Goldener Titel bei Sieg
+                document.getElementById("ui-reward-msg").textContent = KUNDE.belohnungNachricht;
+                document.getElementById("ui-reward-code").textContent = KUNDE.belohnungCode;
+                rewardSec.classList.remove("hidden");
+            } else {
+                titleEl.textContent = KUNDE.verlorenText;
+                titleEl.style.color = "#ff4444"; // Roter Titel bei Verlust
+                rewardSec.classList.add("hidden");
+            }
+
             document.getElementById("gameOverOverlay").classList.remove("hidden");
 
             const inputSection = document.getElementById("nameInputSection");
@@ -405,6 +468,13 @@
 
         document.getElementById("collectionBtn").addEventListener("click", () => {
             window.open(KUNDE.shopLink, "_blank");
+        });
+
+        // NEU: 2. Share-Funktion ausführen
+        document.getElementById("shareBtn").addEventListener("click", () => {
+            const text = KUNDE.shareNachricht.replace("{SCORE}", state.score) + window.location.href;
+            const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(whatsappUrl, "_blank");
         });
 
         document.getElementById("submitScoreBtn").addEventListener("click", async () => {
