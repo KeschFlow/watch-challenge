@@ -3,68 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MG PRECISION | EXCLUSIVE ENGINE</title>
+    <title>MG PRECISION CHALLENGE | LUXURY EDITION</title>
     <style>
-        :root { --titan: #e5e5e7; --steel: #8e8e93; --black: #000; --white: #fff; }
+        :root { 
+            --gold: #d4af37; /* Echtes Gold */
+            --titan: #f4f4f7; /* Sehr helles Titan-Weiß */
+            --steel: #b0b0b5; /* Heller Edelstahl */
+            --black: #111111; /* Nur für Text */
+            --white: #ffffff;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--black); color: var(--white); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        #bg-image { position: fixed; inset: 0; background-image: url('pacman_bg.png'), url('pacman_bg.jpg'); background-size: cover; background-position: center; z-index: 1; }
-        #bg-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 2; }
+        body { 
+            background-color: var(--titan); 
+            color: var(--black); 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            background-image: linear-gradient(135deg, #ffffff 0%, #e0e0e5 100%); /* Marmor/Titan Textur */
+        }
 
-        .hud { position: relative; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; max-width: 900px; margin: 0 auto; width: 100%; }
-        .stat { background: rgba(0,0,0,0.8); border: 1px solid var(--titan); padding: 10px; text-align: center; border-radius: 2px; }
-        .stat .label { font-size: 8px; text-transform: uppercase; color: var(--steel); letter-spacing: 2px; margin-bottom: 3px; }
-        .stat .value { font-size: 18px; font-weight: bold; color: var(--white); }
+        /* HUD - Sehr hell und sauber */
+        .hud { 
+            position: relative; 
+            z-index: 10; 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px; 
+            padding: 20px; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            width: 100%; 
+        }
+        .stat { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(5px); 
+            border: 1px solid rgba(176, 176, 181, 0.3); 
+            padding: 10px; 
+            text-align: center; 
+            border-radius: 2px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .stat .label { font-size: 9px; text-transform: uppercase; color: var(--steel); letter-spacing: 2px; margin-bottom: 4px; }
+        .stat .value { font-size: 20px; font-weight: bold; color: var(--black); }
 
-        .game-shell { position: relative; flex-grow: 1; z-index: 5; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        canvas { max-width: 100%; max-height: 100%; cursor: pointer; z-index: 6; }
+        .game-shell { 
+            position: relative; 
+            flex-grow: 1; 
+            z-index: 5; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+        }
+        canvas { 
+            max-width: 100%; 
+            max-height: 100%; 
+            cursor: pointer; 
+            z-index: 6; 
+            /* Kein schwarzer Kasten mehr! */
+        }
 
-        .overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; }
+        /* Premium Overlays - Frosted Glass Effekt */
+        .overlay { 
+            position: absolute; 
+            inset: 0; 
+            background: rgba(255, 255, 255, 0.85); /* Helles, transparentes Weiß */
+            backdrop-filter: blur(15px); /* Milchglas */
+            -webkit-backdrop-filter: blur(15px);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 100; 
+            text-align: center; 
+            padding: 20px; 
+        }
         .overlay.hidden { display: none !important; }
-        .card { max-width: 400px; width: 100%; border: 1px solid var(--titan); padding: 40px 20px; background: var(--black); box-shadow: 0 0 50px rgba(229,229,231,0.1); }
         
-        h1 { color: var(--titan); font-size: 24px; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 30px; font-weight: 200; }
-        .btn { background: var(--titan); color: var(--black); border: none; padding: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 15px; display: block; text-decoration: none; }
-        .btn-secondary { background: transparent; color: var(--titan); border: 1px solid var(--titan); }
+        .card { 
+            max-width: 440px; 
+            width: 100%; 
+            border: 1px solid rgba(176, 176, 181, 0.5); 
+            padding: 50px 30px; 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        
+        h1 { color: var(--black); font-size: 28px; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; font-weight: 200; }
+        .subtitle { font-size: 11px; color: var(--steel); letter-spacing: 3px; margin-bottom: 40px; text-transform: uppercase; }
 
-        .branding-footer { margin-top: 20px; border-top: 1px solid #222; padding-top: 20px; }
-        .dev-link { color: var(--steel); text-decoration: none; font-size: 11px; letter-spacing: 2px; display: inline-block; border: 1px solid #333; padding: 8px 20px; transition: 0.3s; }
+        /* Buttons - Gold als Premium Akzent */
+        .btn { 
+            background: var(--gold); 
+            color: var(--white); 
+            border: none; 
+            padding: 20px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: all 0.3s; 
+            border-radius: 2px;
+        }
+        .btn:hover { background: #b5942b; transform: translateY(-2px); }
+
+        .branding-footer { margin-top: 40px; border-top: 1px solid #e0e0e5; padding-top: 20px; }
+        .branding-footer p { font-size: 10px; color: var(--steel); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+        .dev-link { color: var(--black); text-decoration: none; font-weight: bold; font-size: 13px; letter-spacing: 1px; }
+        
+        @media (max-width: 600px) { .hud { padding: 10px; } h1 { font-size: 22px; } }
     </style>
 </head>
 <body>
-    <div id="bg-image"></div>
-    <div id="bg-overlay"></div>
     
     <section class="hud">
         <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">0</div></div>
+        <div class="stat"><div class="label">Rekord</div><div class="value" id="bestValue">0</div></div>
         <div class="stat"><div class="label">Units</div><div class="value" id="boxValue">2</div></div>
-        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
 
     <main class="game-shell">
-        <canvas id="gameCanvas" width="800" height="800"></canvas>
+        <canvas id="gameCanvas" width="960" height="960"></canvas>
         
         <div class="overlay" id="startOverlay">
             <div class="card">
                 <h1>THE CHALLENGE</h1>
+                <p class="subtitle">MARC GEBAUER x EDDIE'S WORLD</p>
                 <button class="btn" id="startBtn">MISSION STARTEN</button>
                 <div class="branding-footer">
-                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">GET THIS TOOL</a>
+                    <p>Designed by</p>
+                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">WWW.EDDIES.WORLD</a>
                 </div>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:#ff3b30;">FOKUS VERLOREN</h1>
-                <div id="finalScore" style="font-size:80px; color:var(--titan); margin:10px 0; font-weight:100;">0</div>
-                
+                <h1 style="color:#d93025; letter-spacing: 2px;">FOKUS VERLOREN</h1>
+                <div id="finalScore" style="font-size:80px; color:var(--black); margin:20px 0; font-weight:100;">0</div>
                 <button class="btn" id="restartBtn">RETRY</button>
-                <a href="https://marcgebauer.com" target="_blank" class="btn btn-secondary">ZUR KOLLEKTION</a>
-                
                 <div class="branding-footer">
-                    <a href="mailto:Schulze.kevin81@gmail.com" class="dev-link">GET THIS TOOL</a>
+                    <p>Technologie-Partner</p>
+                    <a href="https://marcgebauer.com" class="dev-link">MARCGEBAUER.COM</a>
                 </div>
             </div>
         </div>
@@ -74,26 +158,42 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    let state = { running: false, score: 0, boxCount: 2, best: localStorage.getItem("mg_exclusive_best") || 0, phase: "idle", phaseStartedAt: 0, correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null };
+    let state = { 
+        running: false, 
+        score: 0, 
+        round: 1, 
+        boxCount: 2, 
+        best: localStorage.getItem("mg_luxury_best") || 0, 
+        phase: "idle", 
+        phaseStartedAt: 0, 
+        correctBoxId: null, 
+        selectedBoxId: null, 
+        swapsRemaining: 0, 
+        activeSwap: null 
+    };
+
     let boxes = [];
     document.getElementById("bestValue").textContent = state.best;
 
-    class TitanBox {
+    class LuxuryBox {
         constructor(id, x, y, size) {
             this.id = id; this.x = x; this.y = y; this.w = size; this.h = size; this.lift = 0;
         }
         draw() {
             ctx.save();
             ctx.translate(this.x + this.w/2, this.y + this.h/2 - this.lift);
-            ctx.strokeStyle = "rgba(229,229,231,0.6)";
-            ctx.lineWidth = 2;
-            ctx.fillStyle = "#050505";
+            
+            // Kiste: Heller Edelstahl/Titan Look
+            ctx.strokeStyle = "rgba(176, 176, 181, 0.6)";
+            ctx.lineWidth = 1;
+            ctx.fillStyle = "#ffffff"; // Weiße Kisten
             ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
             ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
             
+            // Krone: Golden und detailliert
             if ((state.phase === "show" || state.phase === "reveal") && this.id === state.correctBoxId) {
-                ctx.fillStyle = "#fff";
-                const s = this.w * 0.15; // Skalierung der Krone
+                ctx.fillStyle = "#d4af37"; // Goldene Krone
+                const s = this.w * 0.15;
                 ctx.beginPath();
                 ctx.moveTo(-s, s); ctx.lineTo(s, s); ctx.lineTo(s, -s);
                 ctx.lineTo(s*0.5, 0); ctx.lineTo(0, -s*1.5); ctx.lineTo(-s*0.5, 0);
@@ -108,7 +208,7 @@
 
     function buildRound() {
         boxes = [];
-        const areaSize = 650;
+        const areaSize = 750; // Etwas größeres Spielfeld, da hell
         const maxInRow = 5;
         const cols = Math.min(maxInRow, Math.ceil(Math.sqrt(state.boxCount)));
         const rows = Math.ceil(state.boxCount / cols);
@@ -122,20 +222,20 @@
         for (let i = 0; i < state.boxCount; i++) {
             const r = Math.floor(i / cols);
             const c = i % cols;
-            boxes.push(new TitanBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
+            boxes.push(new LuxuryBox(i, startX + c * (boxSize + spacing), startY + r * (boxSize + spacing), boxSize));
         }
 
         state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        state.swapsRemaining = 3 + Math.floor(state.score * 0.4);
+        state.swapsRemaining = 4 + Math.floor(state.score * 0.5);
         setPhase("show");
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1200);
+        setTimeout(() => { if(state.running) setPhase("shuffle"); }, 1300);
     }
 
     function shuffle() {
         if (state.swapsRemaining <= 0) { setPhase("pick"); return; }
         let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
         while(a === b) b = Math.floor(Math.random() * boxes.length);
-        state.activeSwap = { aIdx: a, bIdx: b, startAX: boxes[a].x, startAY: boxes[a].y, startBX: boxes[b].x, startBY: boxes[b].y, progress: 0, speed: 0.035 + (state.score * 0.0015) };
+        state.activeSwap = { aIdx: a, bIdx: b, startAX: boxes[a].x, startAY: boxes[a].y, startBX: boxes[b].x, startBY: boxes[b].y, progress: 0, speed: 0.03 + (state.score * 0.001) };
         state.swapsRemaining--;
     }
 
@@ -154,11 +254,10 @@
             }
         }
         if (state.phase === "reveal") {
-            boxes.forEach(b => { if (b.id === state.correctBoxId || b.id === state.selectedBoxId) b.lift = Math.min(35, b.lift + 4); });
+            boxes.forEach(b => { if (b.id === state.correctBoxId || b.id === state.selectedBoxId) b.lift = Math.min(40, b.lift + 4); });
             if (performance.now() - state.phaseStartedAt > 1500) {
                 if (state.selectedBoxId === state.correctBoxId) {
-                    state.score++;
-                    state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2));
+                    state.score++; state.boxCount = Math.min(25, 2 + Math.floor(state.score / 2));
                     updateHUD(); buildRound();
                 } else endGame();
             }
@@ -170,7 +269,7 @@
 
     function endGame() {
         state.running = false;
-        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_exclusive_best", state.best); document.getElementById("bestValue").textContent = state.best; }
+        if (state.score > state.best) { state.best = state.score; localStorage.setItem("mg_luxury_best", state.best); document.getElementById("bestValue").textContent = state.best; }
         document.getElementById("finalScore").textContent = state.score;
         document.getElementById("gameOverOverlay").classList.remove("hidden");
     }
