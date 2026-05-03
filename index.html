@@ -187,18 +187,18 @@
     let globalLeaderboard = [];
     let unsubscribeLB = null;
 
-    // --- GEFIXTER AUTH INIT (Dynamisch) ---
+    // --- GEFIXTER AUTH INIT (Dynamisch ohne fehlerhaften Fallback) ---
     const initAuth = async () => {
         try {
             if (isCanvas && typeof __initial_auth_token !== 'undefined') {
-                // Im Editor zwingend das Custom-Token nutzen (verhindert permission-denied)
+                // Im Editor MÜSSEN wir das Custom-Token nutzen. Kein Fallback auf Anonym, sonst blockt die interne Datenbank!
                 await signInWithCustomToken(auth, __initial_auth_token);
             } else {
-                // Auf GitHub Pages den anonymen Login nutzen (verhindert custom-token-mismatch)
+                // Auf GitHub Pages nutzen wir den anonymen Login deines eigenen Firebase-Projekts
                 await signInAnonymously(auth);
             }
         } catch (e) { 
-            console.error("Auth Setup Error:", e); 
+            console.error("Auth Setup Error (Bitte diesen Browser-Tab einmal komplett neu laden F5):", e); 
         }
     };
 
