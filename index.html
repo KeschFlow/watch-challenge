@@ -9,13 +9,21 @@
             --mg-dark: #343536; 
             --mg-light: #f1f1f1; 
             --mg-gold: #c5a059; 
-            --mg-box: #222222;
             --danger: #c92a2a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--mg-light); color: var(--mg-dark); height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        body { 
+            background: var(--mg-light); 
+            color: var(--mg-dark); 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            touch-action: none; 
+        }
 
         /* HUD */
         .hud { 
@@ -28,26 +36,31 @@
         .stat { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
         .stat:last-child { border-right: none; }
         .stat .label { font-size: 9px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
-        .stat .value { font-size: 20px; font-weight: bold; color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        
-        .eddie-live {
-            position: absolute; top: 75px; left: 0; right: 0; text-align: center;
-            font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
-            color: #888; z-index: 15; height: 15px; transition: opacity 0.3s; pointer-events: none;
+        .stat .value { font-size: 20px; font-weight: bold; color: #fff; }
+
+        /* Spielfeld (Wie in deiner eddie-game.html skaliert) */
+        .game-shell { 
+            flex-grow: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            height: 100%; 
+            padding-top: 60px; 
+            background: radial-gradient(circle, #fff 0%, #eee 100%);
         }
-
-        .streak-fire { color: #e67e22; font-size: 16px; animation: pulseFire 1.5s infinite alternate; }
-
-        /* Spielfeld */
-        .game-shell { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding-top: 60px; transition: transform 0.3s cubic-bezier(.17,.67,.83,.67); }
-        .game-shell.pick-tension { transform: scale(1.03); } 
         
         canvas { 
+            display: block;
+            width: 100%; 
+            height: auto;
             max-width: 95vw; 
             max-height: 75vh; 
             cursor: pointer; 
             filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); 
-            touch-action: none; /* VERHINDERT SCROLLEN AUF DEM CANVAS */
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* Overlays */
@@ -59,7 +72,7 @@
         h1 { font-size: 24px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; color: var(--mg-dark); font-weight: 900; }
         .subtitle { font-size: 10px; color: #888; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; }
+        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; position: relative; overflow: hidden; }
         .btn:hover { background: var(--mg-gold); }
         .btn-gold { background: var(--mg-gold); color: #000; }
         .btn-outline { background: #fff; color: var(--mg-dark); border: 2px solid var(--mg-dark); padding: 12px; font-size: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
@@ -80,7 +93,9 @@
         .lb-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
         .lb-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
         
-        @keyframes pulseFire { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.2); opacity: 1; } }
+        #nameInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; outline: none; text-transform: uppercase; }
+        #nameInput:focus { border-color: var(--mg-gold); }
+        
         .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
     </style>
@@ -88,14 +103,13 @@
 <body>
     <section class="hud">
         <div class="stat"><div class="label">System Score</div><div class="value" id="scoreValue">0</div></div>
-        <div class="stat"><div class="label">Daily Streak</div><div class="value" id="streakValue"><span class="streak-fire">🔥</span><span id="streakCount">0</span></div></div>
+        <div class="stat"><div class="label">Level</div><div class="value" id="roundValue">1</div></div>
         <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
     </section>
-    
-    <div id="eddieLiveQuote" class="eddie-live"></div>
 
-    <main class="game-shell" id="gameShell">
-        <canvas id="gameCanvas"></canvas>
+    <main class="game-shell">
+        <!-- Feste interne Auflösung wie in deiner eddie-game.html -->
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
         
         <div class="overlay" id="startOverlay">
             <div class="card">
@@ -104,7 +118,7 @@
                 <button class="btn" id="startBtn">SYSTEM STARTEN</button>
                 <div class="lb-container">
                     <div class="lb-title">ELITE RANKING</div>
-                    <ul class="lb-list" id="startLeaderboard"><li class="lb-loading">Lade Ranking...</li></ul>
+                    <ul class="lb-list" id="startLeaderboard"><li style="font-size:12px; color:#888;">Lade Ranking...</li></ul>
                 </div>
             </div>
         </div>
@@ -112,31 +126,25 @@
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
                 <h1 style="color:var(--danger); margin-bottom:5px;">SYSTEM FAILED</h1>
-                <p id="eddieQuote" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;"></p>
+                <p id="aiText" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;">Analysiere Fokus...</p>
                 <div id="finalScore" style="font-size:70px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
                 
                 <div class="identity-grid">
-                    <div class="id-stat"><span>Class</span><strong id="idClass">DISTRACTED</strong></div>
-                    <div class="id-stat"><span>Avg React</span><strong id="idReact">0ms</strong></div>
+                    <div class="id-stat"><span>Globaler Platz</span><strong id="idRank">#--</strong></div>
                     <div class="id-stat"><span>Percentile</span><strong id="idPercentile">Top 99%</strong></div>
-                    <div class="id-stat"><span>Status</span><strong id="idStatus" style="color:var(--mg-gold)">UNVERIFIED</strong></div>
                 </div>
                 
                 <div id="viralLockContainer" class="lock-container">
-                    <div class="lock-overlay">
+                    <div class="lock-overlay" id="lockOverlay">
                         <div style="font-size: 24px; margin-bottom: 10px;">🔒</div>
                         <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px; color: #000; text-transform: uppercase;">Ranking Locked.</p>
                         <button class="btn btn-gold" id="shareBtnUnlock" style="margin-bottom:0;">EGO BEWEISEN (SHARE)</button>
                     </div>
                     <div class="locked-content" id="saveScoreSection">
                         <p style="font-size: 12px; font-weight: 900; margin-bottom: 10px; color: var(--mg-dark); text-transform: uppercase;">SPOT SICHERN:</p>
-                        <input type="text" id="nameInput" placeholder="INSTAGRAM ODER WHATSAPP" maxlength="30" autocomplete="off">
+                        <input type="text" id="nameInput" placeholder="NAME ODER INSTA" maxlength="30" autocomplete="off">
                         <button class="btn btn-outline" id="saveBtn">INS RANKING AUFNEHMEN</button>
                     </div>
-                </div>
-
-                <div id="standardShare" style="display:none; margin-bottom: 15px;">
-                    <button class="btn btn-outline" id="shareBtnStandard">EGO BEWEISEN (SHARE)</button>
                 </div>
 
                 <button class="btn" id="restartBtn">SYSTEM REBOOT</button>
@@ -147,216 +155,523 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC0olKESyTP0rXUlnjGstLlGN50I1m_O2A",
-      authDomain: "mg-challenge.firebaseapp.com",
-      projectId: "mg-challenge",
-      storageBucket: "mg-challenge.firebasestorage.app",
-      messagingSenderId: "472289048663",
-      appId: "1:472289048663:web:cc68ded6007e1e822c4b12"
-    };
-    
+    // --- FIREBASE SETUP ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'mg-precision-v7';
+    let firebaseConfig;
+    try {
+        firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "dummy", authDomain: "dummy", projectId: "dummy" };
+    } catch(e) { console.error(e); }
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
     let currentUser = null;
+    let globalLeaderboard = [];
     let unsubscribeLB = null;
 
-    onAuthStateChanged(auth, (user) => { currentUser = user; if (user) loadLeaderboard(); else signInAnonymously(auth); });
-
-    function loadLeaderboard() {
-        if (unsubscribeLB) unsubscribeLB(); 
-        unsubscribeLB = onSnapshot(collection(db, 'leaderboard'), (snapshot) => {
-            let temp = [];
-            snapshot.forEach(doc => temp.push(doc.data()));
-            temp.sort((a, b) => b.score - a.score);
-            const listEl = document.getElementById("startLeaderboard");
-            listEl.innerHTML = temp.slice(0, 10).map((e, i) => `
-                <li class="lb-row">
-                    <span class="lb-rank">${i<3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1)}</span>
-                    <span class="lb-name">${e.name}</span>
-                    <span class="lb-score">${e.score}</span>
-                </li>`).join('') || '<li class="lb-loading">Noch keine Einträge.</li>';
-        });
-    }
-
-    // --- GAME LOGIC ---
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx;
-    
-    function playTone(f, t, d, v=0.1) {
-        if(!audioCtx || audioCtx.state === 'suspended') return;
-        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
-    }
-
-    let state = { 
-        running: false, score: 0, boxCount: 2, combo: 0, inputLocked: true,
-        phase: "idle", phaseStartedAt: 0, pickStartTime: 0, reactionTimes: [],
-        correctBoxId: null, selectedBoxId: null, swapsRemaining: 0, activeSwap: null
+    const initAuth = async () => {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+            else await signInAnonymously(auth);
+        } catch (e) { console.error(e); }
     };
 
-    function setPhase(p) {
-        state.phase = p;
-        state.phaseStartedAt = performance.now();
-        if (p === "pick") state.inputLocked = false;
-        else state.inputLocked = true;
-    }
+    onAuthStateChanged(auth, (user) => { 
+        currentUser = user; 
+        if (user) loadLeaderboard(); 
+    });
+    initAuth();
 
-    class Box {
-        constructor(id, x, y, s) { this.id=id; this.x=x; this.y=y; this.w=s; this.h=s; this.lift=0; this.scale=1; this.z=0; }
-        draw() {
-            ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2-this.lift); ctx.scale(this.scale, this.scale);
-            if (this.scale > 1) { ctx.shadowBlur = 15; ctx.shadowColor = "rgba(0,0,0,0.5)"; }
-            ctx.fillStyle = "#222222"; ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
-            ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.strokeRect(-this.w/2, -this.h/2, this.w, this.h);
-            if ((state.phase==="show" || state.phase==="reveal") && this.id===state.correctBoxId) {
-                ctx.fillStyle="#c5a059"; const s = this.w*0.2; ctx.beginPath();
-                ctx.moveTo(-s, s*0.5); ctx.lineTo(s, s*0.5); ctx.lineTo(s, -s*0.5);
-                ctx.lineTo(s*0.6, 0); ctx.lineTo(0, -s*1.2); ctx.lineTo(-s*0.6, 0);
-                ctx.lineTo(-s, -s*0.5); ctx.closePath(); ctx.fill();
-            }
-            ctx.restore();
-        }
-    }
-
-    let boxes = [];
-    function buildRound() {
-        boxes = []; const area = canvas.width * 0.8; const maxR = Math.floor(canvas.width / 120); 
-        const cols = Math.min(maxR, Math.ceil(Math.sqrt(state.boxCount))); const rows = Math.ceil(state.boxCount / cols);
-        const s = (area / maxR) - 10; const sp = 15;
-        const tw = cols * s + (cols - 1) * sp; const th = rows * s + (rows - 1) * sp;
-        const sx = (canvas.width - tw) / 2; const sy = (canvas.height - th) / 2;
-        for (let i = 0; i < state.boxCount; i++) {
-            const r = Math.floor(i / cols), c = i % cols;
-            boxes.push(new Box(i, sx + c * (s + sp), sy + r * (s + sp), s));
-        }
-        state.correctBoxId = Math.floor(Math.random() * state.boxCount);
-        state.swapsRemaining = 3 + Math.floor(state.score * 0.6);
-        setPhase("show");
-        document.getElementById("gameShell").classList.remove("pick-tension");
-        setTimeout(() => { if(state.running) setPhase("shuffle"); }, state.score > 10 ? 800 : 1200);
-    }
-
-    function shuffle() {
-        if (state.swapsRemaining <= 0) { 
-            setPhase("pick"); 
-            state.pickStartTime = performance.now();
-            document.getElementById("gameShell").classList.add("pick-tension");
-            return; 
-        }
-        let a = Math.floor(Math.random() * boxes.length), b = Math.floor(Math.random() * boxes.length);
-        while(a === b) b = Math.floor(Math.random() * boxes.length);
-        let speed = Math.min(0.18, 0.04 + state.score * 0.003);
-        const distance = Math.abs(boxes[a].x - boxes[b].x) + Math.abs(boxes[a].y - boxes[b].y);
-        state.activeSwap = { aIdx: a, bIdx: b, sax: boxes[a].x, say: boxes[a].y, sbx: boxes[b].x, sby: boxes[b].y, arcH: (Math.random() > 0.5 ? 1 : -1) * Math.min(distance * 0.35, 100), p: 0, spd: speed };
-        state.swapsRemaining--;
-    }
-
-    function update() {
-        if (state.phase === "shuffle") {
-            if (!state.activeSwap) shuffle();
-            else {
-                state.activeSwap.p += state.activeSwap.spd; const p = Math.min(1, state.activeSwap.p);
-                const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-                const arc = Math.sin(p * Math.PI);
-                const sign = Math.sign(state.activeSwap.arcH) || 1;
-                boxes[state.activeSwap.aIdx].x = state.activeSwap.sax + (state.activeSwap.sbx - state.activeSwap.sax) * ease;
-                boxes[state.activeSwap.aIdx].y = state.activeSwap.say + (state.activeSwap.sby - state.activeSwap.say) * ease - (state.activeSwap.arcH * arc);
-                boxes[state.activeSwap.aIdx].scale = 1 - (sign * arc * 0.15);
-                boxes[state.activeSwap.bIdx].x = state.activeSwap.sbx + (state.activeSwap.sax - state.activeSwap.sbx) * ease;
-                boxes[state.activeSwap.bIdx].y = state.activeSwap.sby + (state.activeSwap.say - state.activeSwap.sby) * ease + (state.activeSwap.arcH * arc);
-                boxes[state.activeSwap.bIdx].scale = 1 + (sign * arc * 0.15);
-                if (p >= 1) {
-                    boxes[state.activeSwap.aIdx].x = state.activeSwap.sbx; boxes[state.activeSwap.aIdx].y = state.activeSwap.sby; boxes[state.activeSwap.aIdx].scale = 1;
-                    boxes[state.activeSwap.bIdx].x = state.activeSwap.sax; boxes[state.activeSwap.bIdx].y = state.activeSwap.say; boxes[state.activeSwap.bIdx].scale = 1;
-                    state.activeSwap = null;
-                }
-            }
-        }
-        if (state.phase === "reveal") {
-            boxes.forEach(bx => { if (bx.id === state.correctBoxId || bx.id === state.selectedBoxId) bx.lift = Math.min(45, bx.lift + 5); });
-            if (performance.now() - state.phaseStartedAt > 1500) {
-                if (state.selectedBoxId === state.correctBoxId) {
-                    state.score += 1 + (state.combo > 1 ? Math.floor(state.combo * 0.5) : 0);
-                    state.boxCount = Math.min(20, 2 + Math.floor(state.score / 4));
-                    document.getElementById("scoreValue").textContent = state.score;
-                    buildRound();
-                } else endGame();
-            }
-        }
-    }
-
-    function loop() { 
-        if (state.running || state.phase === "reveal") update(); ctx.clearRect(0, 0, canvas.width, canvas.height); 
-        boxes.sort((a, b) => a.scale - b.scale).forEach(bx => bx.draw()); 
-        requestAnimationFrame(loop); 
-    }
-
-    // --- UNIFIED UNIFIED INPUT SYSTEM ---
-    function handleInput(e) {
-        if(!audioCtx) audioCtx = new AudioContext();
-        if (!state.running || state.phase !== "pick" || state.inputLocked) return;
-        
-        state.inputLocked = true; // LOCK IMMEDIATELY
-        const rect = canvas.getBoundingClientRect();
-        const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
-        
-        let boxHit = false;
-        boxes.forEach(bx => { 
-            if (cx > bx.x && cx < bx.x + bx.w && cy > bx.y && cy < bx.y + bx.h) { 
-                state.selectedBoxId = bx.id; boxHit = true;
-                if(bx.id === state.correctBoxId) { state.combo++; playTone(880, 'sine', 0.1); } 
-                else { state.combo = 0; playTone(150, 'sawtooth', 0.4); document.body.classList.add("shake-effect"); setTimeout(() => document.body.classList.remove("shake-effect"), 400); }
-                setPhase("reveal"); 
-            } 
+    function loadLeaderboard() {
+        if (!currentUser) return;
+        if (unsubscribeLB) unsubscribeLB(); 
+        const lbRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+        unsubscribeLB = onSnapshot(lbRef, (snapshot) => {
+            globalLeaderboard = [];
+            snapshot.forEach(doc => globalLeaderboard.push({id: doc.id, ...doc.data()}));
+            globalLeaderboard.sort((a, b) => b.score - a.score);
+            const listEl = document.getElementById("startLeaderboard");
+            listEl.innerHTML = globalLeaderboard.length
+                ? globalLeaderboard.slice(0, 10).map((e, i) => `
+                    <li class="lb-row">
+                        <span style="font-weight: bold; color: #888; width: 35px; text-align: left;">#${i + 1}</span>
+                        <span style="font-weight: bold; color: var(--mg-dark); flex-grow: 1; text-align: left;">${e.name}</span>
+                        <span style="font-weight: 900; color: var(--mg-gold); margin-left: 10px;">${e.score} Pkt.</span>
+                    </li>
+                  `).join("")
+                : '<li style="font-size:12px; color:#888; padding:8px 0;">Noch keine Einträge</li>';
         });
-        if(!boxHit) { state.inputLocked = false; playTone(400, 'square', 0.05); }
     }
 
-    function endGame() {
-        state.running = false;
-        document.getElementById("finalScore").textContent = state.score;
-        const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
-        document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
-        
-        const viral = document.getElementById("viralLockContainer");
-        if (state.score >= 7) {
-            viral.style.display = "block"; viral.classList.remove("unlocked");
-            document.getElementById("standardShare").style.display = "none";
-        } else {
-            viral.style.display = "none"; document.getElementById("standardShare").style.display = "block";
-        }
-        document.getElementById("gameOverOverlay").classList.remove("hidden");
-    }
-
-    canvas.addEventListener("pointerdown", handleInput);
-    document.getElementById("startBtn").addEventListener("click", () => { document.getElementById("startOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; buildRound(); });
-    document.getElementById("restartBtn").addEventListener("click", () => { document.getElementById("gameOverOverlay").classList.add("hidden"); state.running = true; state.score = 0; state.boxCount = 2; buildRound(); });
+    // --- GEMINI AI SETUP ---
+    const geminiKey = ""; 
     
+    async function eddieAnalysis(score) {
+      const aiTextEl = document.getElementById("aiText");
+      const prompt = "Du bist Eddie, ein harter, anspruchsvoller Coach. Analysiere den Score des Users kurz und provokant auf Deutsch (max 15 Wörter).";
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiKey}`, {
+            method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: `Score: ${score}` }] }], systemInstruction: { parts: [{ text: prompt }] } })
+        });
+        const data = await res.json();
+        const text = data.candidates[0].content.parts[0].text;
+        aiTextEl.textContent = `"${text}"`;
+        speakEddie(text);
+      } catch (e) { aiTextEl.textContent = '"Fokus verloren. Eddie wartet nicht."'; }
+    }
+
+    function pcmToWav(base64, sampleRate) {
+        const binaryString = atob(base64);
+        const len = binaryString.length;
+        const bytes = new Int16Array(len / 2);
+        for (let i = 0; i < len; i += 2) { bytes[i / 2] = binaryString.charCodeAt(i) | (binaryString.charCodeAt(i + 1) << 8); }
+        const buffer = new ArrayBuffer(44 + bytes.length * 2);
+        const view = new DataView(buffer);
+        const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+        writeString(0, 'RIFF'); view.setUint32(4, 32 + bytes.length * 2, true); writeString(8, 'WAVE');
+        writeString(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true); writeString(36, 'data'); view.setUint32(40, bytes.length * 2, true);
+        bytes.forEach((s, i) => view.setInt16(44 + i * 2, s, true));
+        return new Blob([view], { type: 'audio/wav' });
+    }
+
+    async function speakEddie(text) {
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`, {
+                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: `Say in a demanding German voice: ${text}` }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } }, model: "gemini-2.5-flash-preview-tts" })
+            });
+            const data = await res.json();
+            const wavBlob = pcmToWav(data.candidates[0].content.parts[0].inlineData.data, 24000);
+            new Audio(URL.createObjectURL(wavBlob)).play();
+        } catch (e) {}
+    }
+
+    // --- DEINE ORIGNAL SPIELEMECHANIK (Aus eddie-game.html extrahiert) ---
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const scoreValue = document.getElementById("scoreValue");
+    const roundValue = document.getElementById("roundValue");
+    const bestValue = document.getElementById("bestValue");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const nameInput = document.getElementById("nameInput");
+
+    const BEST_KEY = "mgPrecisionBest_v1";
+
+    const state = {
+      running: false,
+      score: 0,
+      round: 1,
+      boxCount: 2,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      phase: "idle",
+      phaseStartedAt: 0,
+      selectedBoxId: null,
+      correctBoxId: null,
+      hoverBoxId: null,
+      showBallTime: 1400,
+      shuffleDuration: 2200,
+      swapsRemaining: 0,
+      activeSwap: null,
+      breatherMs: 300
+    };
+
+    const boxes = [];
+    bestValue.textContent = state.best;
+
+    // Einfaches Audio Feedback
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function playTone(freq, type, duration, vol=0.1) {
+        if(!audioCtx) audioCtx = new AudioContext();
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function setPhase(next) {
+      state.phase = next;
+      state.phaseStartedAt = performance.now();
+    }
+
+    // DEINE ORIGINAL LERP FUNKTIONEN
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function roundRect(c, x, y, w, h, r, fill, stroke) {
+      c.beginPath();
+      c.moveTo(x + r, y);
+      c.lineTo(x + w - r, y);
+      c.quadraticCurveTo(x + w, y, x + w, y + r);
+      c.lineTo(x + w, y + h - r);
+      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      c.lineTo(x + r, y + h);
+      c.quadraticCurveTo(x, y + h, x, y + h - r);
+      c.lineTo(x, y + r);
+      c.quadraticCurveTo(x, y, x + r, y);
+      c.closePath();
+      if (fill) c.fill();
+      if (stroke) c.stroke();
+    }
+
+    function drawBoxes() {
+      boxes.forEach(box => {
+        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
+        const y = box.y - box.lift;
+        const cx = box.x + box.w / 2;
+        const cy = y + box.h / 2;
+
+        ctx.save();
+        
+        // DEIN ORIGINAL DRAW, ABER MIT MG FARBEN
+        ctx.fillStyle = isHovered ? "#333333" : "#222222";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
+
+        if (isHovered) {
+          ctx.strokeStyle = "#c5a059";
+          ctx.lineWidth = 5;
+          roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+
+        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
+          ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#c92a2a";
+          ctx.lineWidth = 5;
+          roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+
+        if ((state.phase === "show" || state.phase === "reveal") && box.id === state.correctBoxId) {
+          ctx.fillStyle = "#c5a059";
+          ctx.font = `${box.w * 0.45}px Arial`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("👑", cx, cy);
+        }
+
+        ctx.restore();
+      });
+    }
+
+    function buildRound() {
+      boxes.length = 0;
+      state.activeSwap = null;
+      state.selectedBoxId = null;
+      state.hoverBoxId = null;
+
+      const count = state.boxCount;
+      
+      // DEINE REGEL: MAX 5 PRO REIHE
+      const maxCols = 5;
+      const cols = Math.min(maxCols, count);
+      const rows = Math.ceil(count / maxCols);
+
+      const spacing = 24;
+      const availableW = canvas.width - 160;
+      const availableH = canvas.height - 200;
+      const boxW = Math.min(92, Math.min(availableW / cols - spacing, availableH / rows - spacing));
+      const boxH = boxW;
+      const gridH = rows * boxH + (rows - 1) * spacing;
+      const startY = 160 + (availableH - gridH) / 2;
+
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / maxCols);
+        const c = i % maxCols;
+
+        // REIHE ZENTRIEREN WIE GEWÜNSCHT
+        const boxesInThisRow = Math.min(maxCols, count - r * maxCols);
+        const rowWidth = boxesInThisRow * boxW + (boxesInThisRow - 1) * spacing;
+        const startX = (canvas.width - rowWidth) / 2;
+
+        boxes.push({
+          id: i,
+          x: startX + c * (boxW + spacing),
+          y: startY + r * (boxH + spacing),
+          w: boxW,
+          h: boxH,
+          lift: 0
+        });
+      }
+
+      state.correctBoxId = Math.floor(Math.random() * count);
+      state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
+      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
+
+      setPhase("show");
+    }
+
+    // DEINE ORIGINAL SWAP LOGIK
+    function startNextSwap() {
+      if (state.swapsRemaining <= 0) {
+        state.activeSwap = null;
+        setPhase("wait");
+        return;
+      }
+
+      let a = Math.floor(Math.random() * boxes.length);
+      let b = Math.floor(Math.random() * boxes.length);
+
+      while (b === a) {
+        b = Math.floor(Math.random() * boxes.length);
+      }
+
+      const boxA = boxes[a];
+      const boxB = boxes[b];
+
+      state.activeSwap = {
+        aId: boxA.id,
+        bId: boxB.id,
+        aStartX: boxA.x,
+        bStartX: boxB.x,
+        aStartY: boxA.y,
+        bStartY: boxB.y,
+        aTargetX: boxB.x,
+        bTargetX: boxA.x,
+        aTargetY: boxB.y,
+        bTargetY: boxA.y,
+        start: performance.now(),
+        duration: Math.max(260, state.shuffleDuration / 5.2)
+      };
+
+      state.swapsRemaining--;
+    }
+
+    function updateBoxes(ts) {
+      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) {
+        setPhase("shuffle");
+        startNextSwap();
+      } else if (state.phase === "shuffle") {
+        if (!state.activeSwap) {
+          startNextSwap();
+          return;
+        }
+
+        const swap = state.activeSwap;
+        const p = Math.min(1, (ts - swap.start) / swap.duration);
+        const e = easeInOutQuad(p);
+        const boxA = boxes.find(box => box.id === swap.aId);
+        const boxB = boxes.find(box => box.id === swap.bId);
+
+        // DEIN ORIGINAL LINEARER LERP (OHNE ÜBERLAPPUNGS-VERBIEGUNGEN)
+        boxA.x = lerp(swap.aStartX, swap.aTargetX, e);
+        boxB.x = lerp(swap.bStartX, swap.bTargetX, e);
+        boxA.y = lerp(swap.aStartY, swap.aTargetY, e);
+        boxB.y = lerp(swap.bStartY, swap.bTargetY, e);
+
+        if (p >= 1) {
+          boxA.x = swap.aTargetX;
+          boxA.y = swap.aTargetY;
+          boxB.x = swap.bTargetX;
+          boxB.y = swap.bTargetY;
+          state.activeSwap = null;
+        }
+      } else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) {
+        setPhase("pick");
+      } else if (state.phase === "reveal") {
+        const selected = boxes.find(box => box.id === state.selectedBoxId);
+        const correct = boxes.find(box => box.id === state.correctBoxId);
+
+        if (selected) selected.lift = Math.min(selected.h * 0.8, selected.lift + 5);
+        if (correct && correct.id !== state.selectedBoxId) correct.lift = Math.min(correct.h * 0.8, correct.lift + 5);
+
+        if (ts - state.phaseStartedAt > 1200) {
+          if (state.selectedBoxId === state.correctBoxId) {
+            state.score++;
+            state.round++;
+            // STRIKTE REGEL: +1 Punkt = +1 Kiste
+            state.boxCount = 2 + state.score; 
+            buildRound();
+            updateHud();
+          } else {
+            gameOver();
+          }
+        }
+      }
+
+      if (state.phase !== "reveal") {
+        boxes.forEach(box => {
+          box.lift = Math.max(0, box.lift - 6);
+        });
+      }
+    }
+
+    function gameOver() {
+      state.running = false;
+      setPhase("gameover");
+
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem(BEST_KEY, String(state.best));
+      }
+
+      document.getElementById("finalScore").textContent = state.score;
+      updateHud();
+
+      const rank = globalLeaderboard.filter(e => e.score > state.score).length + 1;
+      document.getElementById("idRank").textContent = `#${rank}`;
+      
+      const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
+      document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
+
+      const viral = document.getElementById("viralLockContainer");
+      if (state.score >= 5) {
+          viral.style.display = "block"; viral.classList.remove("unlocked");
+      } else {
+          viral.style.display = "none";
+      }
+
+      gameOverOverlay.classList.remove("hidden");
+      eddieAnalysis(state.score);
+    }
+
+    function updateHud() {
+      scoreValue.textContent = state.score;
+      roundValue.textContent = state.round;
+      bestValue.textContent = state.best;
+    }
+
+    function startGame() {
+      state.running = true;
+      state.score = 0;
+      state.round = 1;
+      state.boxCount = 2;
+      buildRound();
+      updateHud();
+      startOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+      document.getElementById("nameInput").blur();
+    }
+
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      let clientX, clientY;
+
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      // Feste Skalierung wie in deiner Original-Datei
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function handleCanvasTap(e) {
+      const { x, y } = getCanvasPos(e);
+
+      if (state.phase === "pick") {
+        let clickedBoxId = null;
+
+        boxes.forEach(box => {
+          if (
+            x >= box.x &&
+            x <= box.x + box.w &&
+            y >= box.y - box.lift &&
+            y <= box.y - box.lift + box.h
+          ) {
+            clickedBoxId = box.id;
+          }
+        });
+
+        if (clickedBoxId !== null) {
+          state.selectedBoxId = clickedBoxId;
+          if(clickedBoxId === state.correctBoxId) {
+             playTone(880, 'sine', 0.1);
+             if (navigator.vibrate) navigator.vibrate(20);
+          } else {
+             playTone(150, 'sawtooth', 0.4);
+             document.body.classList.add("shake-effect"); 
+             setTimeout(() => document.body.classList.remove("shake-effect"), 400);
+             if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
+          }
+          setPhase("reveal");
+        }
+      }
+    }
+
+    function loop(ts) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (state.running) {
+        updateBoxes(ts);
+      }
+
+      drawBoxes();
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("mousemove", e => {
+      const { x, y } = getCanvasPos(e);
+      state.hoverBoxId = null;
+
+      if (state.phase === "pick") {
+        boxes.forEach(box => {
+          if (
+            x >= box.x &&
+            x <= box.x + box.w &&
+            y >= box.y - box.lift &&
+            y <= box.y - box.lift + box.h
+          ) {
+            state.hoverBoxId = box.id;
+          }
+        });
+      }
+    });
+
+    canvas.addEventListener("click", handleCanvasTap);
+    canvas.addEventListener("touchstart", e => { e.preventDefault(); handleCanvasTap(e); }, { passive: false });
+    canvas.addEventListener("touchmove", e => { e.preventDefault(); }, { passive: false });
+
+    startBtn.onclick = startGame;
+    restartBtn.onclick = startGame;
+
     document.getElementById("shareBtnUnlock").addEventListener("click", () => {
         const text = `Mein Fokus Score: ${state.score}. Schaffst du mehr? ${window.location.href}`;
         if (navigator.share) navigator.share({ title: 'Focus System', text: text }).then(() => document.getElementById("viralLockContainer").classList.add("unlocked"));
         else { navigator.clipboard.writeText(text); document.getElementById("viralLockContainer").classList.add("unlocked"); }
     });
 
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-        const name = document.getElementById("nameInput").value.trim() || "Gast";
-        await setDoc(doc(db, 'leaderboard', currentUser.uid), { name, score: state.score, uid: currentUser.uid });
-        document.getElementById("saveScoreSection").style.display = "none";
-    });
+    saveBtn.onclick = async () => {
+        if (!currentUser) return;
+        const name = nameInput.value.trim().toUpperCase() || "ANON";
+        saveBtn.innerText = "SAVING...";
+        
+        try {
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', currentUser.uid), { 
+                name, score: state.score, uid: currentUser.uid, timestamp: Date.now() 
+            });
+            document.getElementById("saveScoreSection").style.display = "none";
+        } catch(e) { console.error(e); }
+    };
 
-    loop();
-</script>
+    requestAnimationFrame(loop);
+  </script>
 </body>
 </html>
