@@ -114,7 +114,7 @@
         <div class="overlay" id="startOverlay">
             <div class="card">
                 <h1>FOCUS SYSTEM</h1>
-                <p class="subtitle">MARC GEBAUER x EDDIE'S WORLD</p>
+                <p class="subtitle">MG PERFORMANCE DIAGNOSTICS</p>
                 <button class="btn" id="startBtn">SYSTEM STARTEN</button>
                 <div class="lb-container">
                     <div class="lb-title">ELITE RANKING</div>
@@ -209,9 +209,9 @@
     // --- GEMINI AI SETUP ---
     const geminiKey = ""; 
     
-    async function eddieAnalysis(score) {
+    async function marcAnalysis(score) {
       const aiTextEl = document.getElementById("aiText");
-      const prompt = "Du bist Eddie, ein harter, anspruchsvoller Coach. Analysiere den Score des Users kurz und provokant auf Deutsch (max 15 Wörter).";
+      const prompt = "Du bist Marc Gebauer, ein bekannter Luxus-Uhrenhändler. Analysiere den Fokus-Score des Users kurz, exklusiv und mit deiner typischen direkten, geschäftstüchtigen Art auf Deutsch (max 15 Wörter).";
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiKey}`, {
             method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: `Score: ${score}` }] }], systemInstruction: { parts: [{ text: prompt }] } })
@@ -219,8 +219,8 @@
         const data = await res.json();
         const text = data.candidates[0].content.parts[0].text;
         aiTextEl.textContent = `"${text}"`;
-        speakEddie(text);
-      } catch (e) { aiTextEl.textContent = '"Fokus verloren. Eddie wartet nicht."'; }
+        speakMarc(text);
+      } catch (e) { aiTextEl.textContent = '"Das war schwach. In der Zeit habe ich drei Uhren verkauft."'; }
     }
 
     function pcmToWav(base64, sampleRate) {
@@ -239,10 +239,10 @@
         return new Blob([view], { type: 'audio/wav' });
     }
 
-    async function speakEddie(text) {
+    async function speakMarc(text) {
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`, {
-                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: `Say in a demanding German voice: ${text}` }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } }, model: "gemini-2.5-flash-preview-tts" })
+                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: `Say in a confident, successful German male voice: ${text}` }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } }, model: "gemini-2.5-flash-preview-tts" })
             });
             const data = await res.json();
             const wavBlob = pcmToWav(data.candidates[0].content.parts[0].inlineData.data, 24000);
@@ -540,7 +540,7 @@
       }
 
       gameOverOverlay.classList.remove("hidden");
-      eddieAnalysis(state.score);
+      marcAnalysis(state.score);
     }
 
     function updateHud() {
